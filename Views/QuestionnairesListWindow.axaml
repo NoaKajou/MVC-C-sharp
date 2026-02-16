@@ -1,0 +1,157 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MVC_C_sharp.Views.QuestionnairesListWindow"
+        Title="Questionnaires"
+        Width="800" Height="600"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="20,15">
+            <TextBlock Text="📋 Questionnaires" 
+                       FontSize="22" 
+                       FontWeight="Bold" 
+                       VerticalAlignment="Center"/>
+            
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        Spacing="10">
+                <Button Name="BtnRetour"
+                        Content="Retour à l'accueil"
+                        Click="BtnRetour_Click"/>
+                <Button Name="BtnDeconnexion"
+                        Content="Se déconnecter"
+                        Background="#E74C3C"
+                        Foreground="White"
+                        Click="BtnDeconnexion_Click"/>
+            </StackPanel>
+        </DockPanel>
+
+        <Border Grid.Row="1" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Margin="0,0,10,0">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,15">
+                            <TextBlock Text="Tous les questionnaires"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="Sélectionnez un questionnaire pour y jouer"
+                                       FontSize="12"
+                                       Opacity="0.7"/>
+                        </StackPanel>
+
+                        <Button DockPanel.Dock="Bottom" 
+                                Name="BtnJouer"
+                                Content="▶ Jouer au questionnaire sélectionné"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Padding="15"
+                                Margin="0,10,0,0"
+                                Background="#27AE60"
+                                Foreground="White"
+                                Click="BtnJouer_Click"/>
+
+                        <Border Background="#534f4f" CornerRadius="8" Padding="10">
+                            <ListBox Name="ListTousQuestionnaires"
+                                     Background="Transparent"
+                                     SelectionMode="Single">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10" Margin="2">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Nom}" FontWeight="SemiBold" FontSize="14"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="15" Margin="0,5,0,0">
+                                                    <TextBlock Text="{Binding Theme}" FontSize="12" Opacity="0.7"/>
+                                                    <TextBlock Text="{Binding NombreQuestions, StringFormat='{}{0} questions'}" 
+                                                               FontSize="12" Opacity="0.7"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </DockPanel>
+                </Border>
+
+                <Border Grid.Column="1" Margin="10,0,0,0">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,15">
+                            <TextBlock Text="Mes questionnaires"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="Gérez vos propres questionnaires"
+                                       FontSize="12"
+                                       Opacity="0.7"/>
+                        </StackPanel>
+
+                        <StackPanel DockPanel.Dock="Bottom" Spacing="5" Margin="0,10,0,0">
+                            <Button Name="BtnNouveau"
+                                    Content="➕ Nouveau questionnaire"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center"
+                                    Padding="10"
+                                    Background="#5865F2"
+                                    Foreground="White"
+                                    Click="BtnNouveau_Click"/>
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <Button Name="BtnEditer"
+                                        Content="✏️ Éditer"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Center"
+                                        Padding="10"
+                                        Click="BtnEditer_Click"/>
+                                <Button Name="BtnSupprimer"
+                                        Content="🗑️ Supprimer"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Center"
+                                        Padding="10"
+                                        Background="#E74C3C"
+                                        Foreground="White"
+                                        Click="BtnSupprimer_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Background="#534f4f" CornerRadius="8" Padding="10">
+                            <ListBox Name="ListMesQuestionnaires"
+                                     Background="Transparent"
+                                     SelectionMode="Single">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10" Margin="2">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Nom}" FontWeight="SemiBold" FontSize="14"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="15" Margin="0,5,0,0">
+                                                    <TextBlock Text="{Binding Theme}" FontSize="12" Opacity="0.7"/>
+                                                    <TextBlock Text="{Binding NombreQuestions, StringFormat='{}{0} questions'}" 
+                                                               FontSize="12" Opacity="0.7"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+
+                        <TextBlock Name="TxtAucunQuestionnaire"
+                                   Text="Vous n'avez pas encore créé de questionnaire"
+                                   IsVisible="False"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Opacity="0.7"/>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+
+</Window>

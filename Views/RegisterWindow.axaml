@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MVC_C_sharp.Views.RegisterWindow"
+        Title="Questionnaire - Inscription"
+        Width="400" Height="600"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False">
+    
+    <Border Padding="30">
+        <StackPanel VerticalAlignment="Center" Spacing="15">
+            
+            
+            <TextBlock Text="QUESTIONNAIRE" 
+                       FontSize="20" 
+                       FontWeight="Bold" 
+                       HorizontalAlignment="Center"/>
+            
+            <TextBlock Text="Inscription" 
+                       FontSize="14" 
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,20"/>
+            
+            
+            <TextBlock Text="Pseudo"/>
+            <TextBox Name="TxtPseudo" 
+                     Watermark="Entrez votre pseudo"/>
+            
+           
+            <TextBlock Text="Email"/>
+            <TextBox Name="TxtEmail" 
+                     Watermark="Entrez votre email"/>
+            
+            
+            <TextBlock Text="Mot de passe"/>
+            <TextBox Name="TxtMotDePasse" 
+                     PasswordChar="●"
+                     Watermark="Entrez votre mot de passe"/>
+            
+            
+            <TextBlock Text="Confirmer le mot de passe"/>
+            <TextBox Name="TxtConfirmMotDePasse" 
+                     PasswordChar="●"
+                     Watermark="Confirmez votre mot de passe"/>
+            
+            
+            <TextBlock Name="TxtErreur" 
+                       Foreground="Red" 
+                       HorizontalAlignment="Center"
+                       IsVisible="False"/>
+            
+            
+            <TextBlock Name="TxtSucces" 
+                       Foreground="Green" 
+                       HorizontalAlignment="Center"
+                       IsVisible="False"/>
+            
+            
+            <Button Name="BtnInscription" 
+                    Content="S'inscrire" 
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Padding="15,10"
+                    Margin="0,10,0,0"
+                    Click="BtnInscription_Click"/>
+            
+            
+            <Button Name="BtnVersConnexion" 
+                    Content="Déjà un compte ? Se connecter"
+                    HorizontalAlignment="Center"
+                    Background="Transparent"
+                    Margin="0,10,0,0"
+                    Click="BtnVersConnexion_Click"/>
+            
+        </StackPanel>
+    </Border>
+</Window>

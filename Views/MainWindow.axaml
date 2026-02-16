@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MVC_C_sharp.Views.MainWindow"
+        Title="Questionnaire - Accueil"
+        Width="800" Height="550"
+        WindowStartupLocation="CenterScreen">
+    
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="20,15">
+            <DockPanel>
+                <TextBlock Text="QUESTIONNAIRE - Accueil" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           VerticalAlignment="Center"/>
+                
+                <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Right" 
+                            Spacing="10">
+                    <TextBlock Name="TxtPseudo" 
+                               VerticalAlignment="Center"/>
+                    <Button Name="BtnDeconnexion" 
+                            Content="Bye Bye nigga" 
+                            Click="BtnDeconnexion_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+        
+        <Border DockPanel.Dock="Left" Width="180" Padding="10">
+            <StackPanel Spacing="5">
+                <Button Name="BtnQuestionnaires"
+                        Content="Questionnaires" 
+                        Click="BtnQuestionnaires_Click"
+                        HorizontalAlignment="Stretch"/>
+                <Button Name="BtnUser_Info" 
+                        Content="Ta feuille" 
+                        Click="BtnUser_Info_Click"  
+                        HorizontalAlignment="Stretch"/>
+            </StackPanel>
+        </Border>
+        
+        <Border Padding="20">
+            <TextBlock Text="Appuie sur un bouton" 
+                       TextWrapping="Wrap"/>
+        </Border>
+    </DockPanel>
+</Window>
