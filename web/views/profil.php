@@ -48,7 +48,6 @@ include 'header.php';
                 <div class="questionnaire-list-small">
                     <?php foreach ($questionnaires as $q): ?>
                         <div class="questionnaire-item">
-                            <span class="icon">📋</span>
                             <div class="item-info">
                                 <strong><?= htmlspecialchars($q->nom) ?></strong>
                                 <span><?= htmlspecialchars($q->theme) ?> - <?= $q->nombreQuestions ?> questions</span>

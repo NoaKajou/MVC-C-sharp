@@ -116,7 +116,7 @@ function showResult() {
     document.getElementById('resultContainer').style.display = 'block';
     
     const percentage = Math.round((score / questions.length) * 100);
-    document.getElementById('resultTitle').textContent = percentage >= 50 ? '🎉 Bravo !' : '😢 Dommage...';
+    document.getElementById('resultTitle').textContent = percentage >= 50 ? 'Bravo !' : 'Dommage...';
     document.getElementById('resultScore').textContent = `Vous avez obtenu ${score}/${questions.length} (${percentage}%)`;
     
     document.querySelector('.result-box').className = 'result-box ' + (percentage >= 50 ? 'success' : 'fail');

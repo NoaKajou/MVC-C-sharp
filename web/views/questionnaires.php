@@ -5,7 +5,7 @@ include 'header.php';
 
 <div class="page-container">
     <header class="top-bar">
-        <h1>📋 Questionnaires</h1>
+        <h1>Questionnaires</h1>
         <div class="header-actions">
             <a href="accueil.php" class="btn">Retour à l'accueil</a>
             <a href="logout.php" class="btn btn-danger">Se déconnecter</a>
@@ -33,7 +33,7 @@ include 'header.php';
                 <?php endif; ?>
             </div>
             
-            <button id="btnJouer" class="btn btn-success btn-full" disabled>▶ Jouer au questionnaire sélectionné</button>
+            <button id="btnJouer" class="btn btn-success btn-full" disabled>Jouer au questionnaire sélectionné</button>
         </section>
         
         <section class="questionnaire-section">
@@ -57,10 +57,10 @@ include 'header.php';
             </div>
             
             <div class="action-buttons">
-                <a href="questionnaire_edit.php" class="btn btn-primary btn-full">➕ Nouveau questionnaire</a>
+                <a href="questionnaire_edit.php" class="btn btn-primary btn-full">Nouveau questionnaire</a>
                 <div class="btn-row">
-                    <button id="btnEditer" class="btn" disabled>✏️ Éditer</button>
-                    <button id="btnSupprimer" class="btn btn-danger" disabled>🗑️ Supprimer</button>
+                    <button id="btnEditer" class="btn" disabled>Editer</button>
+                    <button id="btnSupprimer" class="btn btn-danger" disabled>Supprimer</button>
                 </div>
             </div>
         </section>
