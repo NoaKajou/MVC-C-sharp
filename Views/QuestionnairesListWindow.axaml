@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Margin="20,15">
-            <TextBlock Text="📋 Questionnaires" 
+            <TextBlock Text="Questionnaires" 
                        FontSize="22" 
                        FontWeight="Bold" 
                        VerticalAlignment="Center"/>
@@ -96,7 +96,7 @@
 
                         <StackPanel DockPanel.Dock="Bottom" Spacing="5" Margin="0,10,0,0">
                             <Button Name="BtnNouveau"
-                                    Content="➕ Nouveau questionnaire"
+                                    Content="Nouveau questionnaire"
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Center"
                                     Padding="10"
@@ -105,13 +105,13 @@
                                     Click="BtnNouveau_Click"/>
                             <StackPanel Orientation="Horizontal" Spacing="5">
                                 <Button Name="BtnEditer"
-                                        Content="✏️ Éditer"
+                                        Content="Éditer"
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Center"
                                         Padding="10"
                                         Click="BtnEditer_Click"/>
                                 <Button Name="BtnSupprimer"
-                                        Content="🗑️ Supprimer"
+                                        Content="Supprimer"
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Center"
                                         Padding="10"

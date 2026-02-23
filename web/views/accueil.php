@@ -14,8 +14,8 @@ include 'header.php';
     
     <div class="content-wrapper">
         <aside class="sidebar">
-            <a href="questionnaires.php" class="btn btn-sidebar">📋 Questionnaires</a>
-            <a href="profil.php" class="btn btn-sidebar">👤 Mon profil</a>
+            <a href="questionnaires.php" class="btn btn-sidebar">Questionnaires</a>
+            <a href="profil.php" class="btn btn-sidebar">Mon profil</a>
         </aside>
         
         <main class="main-content">

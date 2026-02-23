@@ -65,8 +65,8 @@ include 'header.php';
                                 <input type="hidden" name="reponses[<?= $index ?>][valeur]" value="<?= htmlspecialchars($r->valeur) ?>">
                                 <input type="hidden" name="reponses[<?= $index ?>][estCorrecte]" value="<?= $r->estCorrecte ? '1' : '0' ?>">
                                 <span class="reponse-valeur"><?= htmlspecialchars($r->valeur) ?></span>
-                                <span class="reponse-correcte"><?= $r->estCorrecte ? '✓ Correcte' : '' ?></span>
-                                <button type="button" class="btn btn-small btn-danger btn-remove">✕</button>
+                                <span class="reponse-correcte"><?= $r->estCorrecte ? 'Correcte' : '' ?></span>
+                                <button type="button" class="btn btn-small btn-danger btn-remove">X</button>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -113,8 +113,8 @@ document.getElementById('btnAjouterValeur').addEventListener('click', () => {
             <input type="hidden" name="reponses[${reponseIndex}][valeur]" value="${valeur}">
             <input type="hidden" name="reponses[${reponseIndex}][estCorrecte]" value="${estCorrecte ? '1' : '0'}">
             <span class="reponse-valeur">${valeur}</span>
-            <span class="reponse-correcte">${estCorrecte ? '✓ Correcte' : ''}</span>
-            <button type="button" class="btn btn-small btn-danger btn-remove">✕</button>
+            <span class="reponse-correcte">${estCorrecte ? 'Correcte' : ''}</span>
+            <button type="button" class="btn btn-small btn-danger btn-remove">X</button>
         `;
         container.appendChild(div);
         

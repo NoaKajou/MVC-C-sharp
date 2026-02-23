@@ -84,3 +84,4 @@
 /home/noa/Documents/GitHub/MVC-C-sharp/obj/Debug/net9.0/MVC-C-sh.B20188F8.Up2Date
 /home/noa/Documents/GitHub/MVC-C-sharp/obj/Debug/net9.0/MVC-C-sharp.genruntimeconfig.cache
 /home/noa/Documents/GitHub/MVC-C-sharp/obj/Debug/net9.0/ref/MVC-C-sharp.dll
+/home/noa/Documents/GitHub/MVC-C-sharp/obj/Debug/net9.0/MVC-C-sharp.sourcelink.json
