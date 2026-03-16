@@ -6,17 +6,16 @@ namespace MVC_C_sharp.Repositories
 {
     public class UtilisateurRepository
     {
-        public Utilisateur? GetByEmailAndPassword(string email, string mdp)
+        public Utilisateur? GetById(int id)
         {
             using (var connection = DatabaseConnection.GetConnection())
             {
                 connection.Open();
-                string query = "SELECT id, email, pseudo, mdp FROM Utilisateur WHERE email = @email AND mdp = @mdp";
-                
+                string query = "SELECT id, email, pseudo, mdp FROM Utilisateur WHERE id = @id";
+
                 using (var cmd = new MySqlCommand(query, connection))
                 {
-                    cmd.Parameters.AddWithValue("@email", email);
-                    cmd.Parameters.AddWithValue("@mdp", mdp);
+                    cmd.Parameters.AddWithValue("@id", id);
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -33,6 +32,40 @@ namespace MVC_C_sharp.Repositories
                     }
                 }
             }
+
+            return null;
+        }
+
+        public Utilisateur? GetByEmailAndPassword(string email, string mdp)
+        {
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                connection.Open();
+                string query = "SELECT id, email, pseudo, mdp FROM Utilisateur WHERE email = @email";
+                
+                using (var cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@email", email);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            string storedHash = reader.GetString("mdp");
+                            if (BCrypt.Net.BCrypt.Verify(mdp, storedHash))
+                            {
+                                return new Utilisateur
+                                {
+                                    Id = reader.GetInt32("id"),
+                                    Email = reader.GetString("email"),
+                                    Pseudo = reader.GetString("pseudo"),
+                                    Mdp = storedHash
+                                };
+                            }
+                        }
+                    }
+                }
+            }
             return null;
         }
 
@@ -41,24 +74,27 @@ namespace MVC_C_sharp.Repositories
             using (var connection = DatabaseConnection.GetConnection())
             {
                 connection.Open();
-                string query = "SELECT id, email, pseudo, mdp FROM Utilisateur WHERE pseudo = @pseudo AND mdp = @mdp";
+                string query = "SELECT id, email, pseudo, mdp FROM Utilisateur WHERE pseudo = @pseudo";
                 
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@pseudo", pseudo);
-                    cmd.Parameters.AddWithValue("@mdp", mdp);
 
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            return new Utilisateur
+                            string storedHash = reader.GetString("mdp");
+                            if (BCrypt.Net.BCrypt.Verify(mdp, storedHash))
                             {
-                                Id = reader.GetInt32("id"),
-                                Email = reader.GetString("email"),
-                                Pseudo = reader.GetString("pseudo"),
-                                Mdp = reader.GetString("mdp")
-                            };
+                                return new Utilisateur
+                                {
+                                    Id = reader.GetInt32("id"),
+                                    Email = reader.GetString("email"),
+                                    Pseudo = reader.GetString("pseudo"),
+                                    Mdp = storedHash
+                                };
+                            }
                         }
                     }
                 }
@@ -102,12 +138,13 @@ namespace MVC_C_sharp.Repositories
             {
                 connection.Open();
                 string query = "INSERT INTO Utilisateur (pseudo, email, mdp) VALUES (@pseudo, @email, @mdp)";
+                string hashedMdp = BCrypt.Net.BCrypt.HashPassword(mdp);
                 
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@pseudo", pseudo);
                     cmd.Parameters.AddWithValue("@email", email);
-                    cmd.Parameters.AddWithValue("@mdp", mdp);
+                    cmd.Parameters.AddWithValue("@mdp", hashedMdp);
                     return cmd.ExecuteNonQuery() > 0;
                 }
             }

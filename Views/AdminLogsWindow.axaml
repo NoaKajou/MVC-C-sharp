@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MVC_C_sharp.Views.AdminLogsWindow"
+        Title="Logs Admin"
+        Width="900" Height="620"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="20,15">
+            <TextBlock Text="Logs administrateur"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="10">
+                <Button Name="BtnRetour"
+                        Content="Retour a l'accueil"
+                        Click="BtnRetour_Click"/>
+                <Button Name="BtnDeconnexion"
+                        Content="Se deconnecter"
+                        Background="#E74C3C"
+                        Foreground="White"
+                        Click="BtnDeconnexion_Click"/>
+            </StackPanel>
+        </DockPanel>
+
+        <Border Grid.Row="1" Padding="20">
+            <StackPanel Spacing="10">
+                <TextBlock Name="TxtErreur"
+                           IsVisible="False"
+                           Foreground="#E74C3C"
+                           TextWrapping="Wrap"/>
+
+                <Border Name="LogsContainer" Background="#534f4f" CornerRadius="8" Padding="10">
+                    <ScrollViewer>
+                        <ListBox Name="ListLogs"
+                                 Background="Transparent">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="12" Margin="2" BorderBrush="#707070" BorderThickness="0,0,0,1">
+                                        <StackPanel Spacing="6">
+                                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                                <TextBlock Text="{Binding DateLog, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding Action}"/>
+                                                <TextBlock Text="{Binding UtilisateurAffichage}"
+                                                           Opacity="0.8"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Details}"
+                                                       TextWrapping="Wrap"
+                                                       Opacity="0.9"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

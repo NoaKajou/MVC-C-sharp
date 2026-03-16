@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "spscIWc/a7M=",
+  "dgSpecHash": "rjQs3/52FrI=",
   "success": true,
   "projectFilePath": "/home/noa/Documents/GitHub/MVC-C-sharp/MVC-C-sharp.csproj",
   "expectedPackageFiles": [
@@ -17,6 +17,7 @@
     "/home/noa/.nuget/packages/avalonia.themes.fluent/11.2.5/avalonia.themes.fluent.11.2.5.nupkg.sha512",
     "/home/noa/.nuget/packages/avalonia.win32/11.2.5/avalonia.win32.11.2.5.nupkg.sha512",
     "/home/noa/.nuget/packages/avalonia.x11/11.2.5/avalonia.x11.11.2.5.nupkg.sha512",
+    "/home/noa/.nuget/packages/bcrypt.net-next/4.1.0/bcrypt.net-next.4.1.0.nupkg.sha512",
     "/home/noa/.nuget/packages/bouncycastle.cryptography/2.2.1/bouncycastle.cryptography.2.2.1.nupkg.sha512",
     "/home/noa/.nuget/packages/google.protobuf/3.21.9/google.protobuf.3.21.9.nupkg.sha512",
     "/home/noa/.nuget/packages/harfbuzzsharp/7.3.0.3/harfbuzzsharp.7.3.0.3.nupkg.sha512",

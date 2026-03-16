@@ -260,6 +260,15 @@ namespace MVC_C_sharp.Views
                 int total = _questions.Count;
                 double pourcentage = (double)score / total * 100;
 
+                try
+                {
+                    _controller.LogQuestionnaireCompletion(_utilisateur.Id, _questionnaire, score, total);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erreur log questionnaire: {ex.Message}");
+                }
+
                 if (txtResultat != null)
                     txtResultat.Text = "Questionnaire terminé !";
                 

@@ -578,6 +578,76 @@ a {
     gap: 10px;
 }
 
+    .btn-warn {
+        background: #e67e22;
+        color: #ffffff;
+    }
+
+    .btn-warn:hover {
+        background: #cf6d17;
+    }
+
+    /* Modal signalement */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .modal-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 28px 28px 24px;
+        width: 100%;
+        max-width: 480px;
+        animation: enter-up 200ms ease-out;
+    }
+
+    .modal-box h3 {
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+
+    .modal-subtitle {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 16px;
+        font-style: italic;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .signal-feedback {
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 14px;
+        margin-top: 8px;
+    }
+
+    .signal-success {
+        background: #ebfaf0;
+        color: #1f9d55;
+        border: 1px solid #b9e7c7;
+    }
+
+    .signal-error {
+        background: #ffefed;
+        color: var(--danger);
+        border: 1px solid #f3c3bd;
+    }
+
 .result-box {
     text-align: center;
     border-radius: 12px;

@@ -13,6 +13,7 @@
           "Avalonia.Desktop": "11.2.5",
           "Avalonia.Fonts.Inter": "11.2.5",
           "Avalonia.Themes.Fluent": "11.2.5",
+          "BCrypt.Net-Next": "4.1.0",
           "MySql.Data": "8.2.0"
         },
         "runtime": {
@@ -218,6 +219,14 @@
           "lib/net8.0/Avalonia.X11.dll": {
             "assemblyVersion": "11.2.5.0",
             "fileVersion": "11.2.5.0"
+          }
+        }
+      },
+      "BCrypt.Net-Next/4.1.0": {
+        "runtime": {
+          "lib/netstandard2.1/BCrypt.Net-Next.dll": {
+            "assemblyVersion": "4.1.0.0",
+            "fileVersion": "4.1.0.0"
           }
         }
       },
@@ -757,6 +766,13 @@
       "sha512": "sha512-rkf1xqsH6t4zc5j2KeJ2oTbyUyMsiEemgnwOgnHW/bgpeW4DDhZgiZ8xdFIxnvayAoYD+5WhPAEs8ztQNTr8qg==",
       "path": "avalonia.x11/11.2.5",
       "hashPath": "avalonia.x11.11.2.5.nupkg.sha512"
+    },
+    "BCrypt.Net-Next/4.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5YT3DKllmtkyW68PjURu/V1TOe4MKiByKwsRNVcfYE1S5KuFTeozdmKzyNzolKiQF391OXCaQtINvYT3j1ERzQ==",
+      "path": "bcrypt.net-next/4.1.0",
+      "hashPath": "bcrypt.net-next.4.1.0.nupkg.sha512"
     },
     "BouncyCastle.Cryptography/2.2.1": {
       "type": "package",

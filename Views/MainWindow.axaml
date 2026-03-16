@@ -19,7 +19,7 @@
                     <TextBlock Name="TxtPseudo" 
                                VerticalAlignment="Center"/>
                     <Button Name="BtnDeconnexion" 
-                            Content="Bye Bye nigga" 
+                            Content="Deconnexion" 
                             Click="BtnDeconnexion_Click"/>
                 </StackPanel>
             </DockPanel>
@@ -35,6 +35,11 @@
                         Content="Ta feuille" 
                         Click="BtnUser_Info_Click"  
                         HorizontalAlignment="Stretch"/>
+            <Button Name="BtnAdminLogs"
+                Content="Logs Admin"
+                Click="BtnAdminLogs_Click"
+                IsVisible="False"
+                HorizontalAlignment="Stretch"/>
             </StackPanel>
         </Border>
         

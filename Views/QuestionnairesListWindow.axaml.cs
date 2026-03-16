@@ -107,7 +107,7 @@ public partial class QuestionnairesListWindow : Window
         var listMes = this.FindControl<ListBox>("ListMesQuestionnaires");
         if (listMes?.SelectedItem is Questionnaire questionnaire)
         {
-            _questionnaireController.DeleteQuestionnaire(questionnaire.Id);
+            _questionnaireController.DeleteQuestionnaire(questionnaire.Id, _utilisateur.Id);
             ChargerQuestionnaires();
         }
     }

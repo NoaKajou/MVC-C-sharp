@@ -22,6 +22,7 @@ include 'header.php';
             <div class="play-actions">
                 <button id="btnQuitter" class="btn">Quitter</button>
                 <button id="btnPrecedent" class="btn" disabled>Précédent</button>
+                <button id="btnSignaler" class="btn btn-warn">&#9873; Signaler</button>
                 <button id="btnSuivant" class="btn btn-primary">Suivant</button>
             </div>
         </div>
@@ -32,6 +33,23 @@ include 'header.php';
                 <p id="resultScore"></p>
                 <a href="questionnaires.php" class="btn btn-primary">Retour aux questionnaires</a>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modale signalement -->
+<div id="modalSignalement" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <h3>Signaler un problème</h3>
+        <p class="modal-subtitle" id="signalQuestionLabel"></p>
+        <div class="form-group">
+            <label for="signalDescription">Décrivez le problème :</label>
+            <textarea id="signalDescription" rows="4" placeholder="Ex : la bonne réponse semble incorrecte..."></textarea>
+        </div>
+        <div id="signalFeedback" class="signal-feedback" style="display:none;"></div>
+        <div class="modal-actions">
+            <button id="btnSignalAnnuler" class="btn">Annuler</button>
+            <button id="btnSignalEnvoyer" class="btn btn-warn">Envoyer</button>
         </div>
     </div>
 </div>
@@ -146,6 +164,62 @@ document.getElementById('btnQuitter').addEventListener('click', () => {
         window.location.href = 'questionnaires.php';
     }
 });
+
+// --- Signalement ---
+document.getElementById('btnSignaler').addEventListener('click', () => {
+    const q = questions[currentIndex];
+    document.getElementById('signalQuestionLabel').textContent = '« ' + q.libelle + ' »';
+    document.getElementById('signalDescription').value = '';
+    document.getElementById('signalFeedback').style.display = 'none';
+    document.getElementById('btnSignalEnvoyer').disabled = false;
+    document.getElementById('modalSignalement').style.display = 'flex';
+});
+
+document.getElementById('btnSignalAnnuler').addEventListener('click', () => {
+    document.getElementById('modalSignalement').style.display = 'none';
+});
+
+document.getElementById('modalSignalement').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modalSignalement')) {
+        document.getElementById('modalSignalement').style.display = 'none';
+    }
+});
+
+document.getElementById('btnSignalEnvoyer').addEventListener('click', async () => {
+    const description = document.getElementById('signalDescription').value.trim();
+    if (!description) {
+        showSignalFeedback('Veuillez décrire le problème.', false);
+        return;
+    }
+    document.getElementById('btnSignalEnvoyer').disabled = true;
+
+    try {
+        const res = await fetch('api/report_question.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionId: questions[currentIndex].id, description })
+        });
+        const data = await res.json();
+        showSignalFeedback(data.message, data.success === true);
+        if (data.success) {
+            setTimeout(() => {
+                document.getElementById('modalSignalement').style.display = 'none';
+            }, 1800);
+        } else {
+            document.getElementById('btnSignalEnvoyer').disabled = false;
+        }
+    } catch {
+        showSignalFeedback('Erreur réseau, veuillez réessayer.', false);
+        document.getElementById('btnSignalEnvoyer').disabled = false;
+    }
+});
+
+function showSignalFeedback(msg, success) {
+    const el = document.getElementById('signalFeedback');
+    el.textContent = msg;
+    el.className = 'signal-feedback ' + (success ? 'signal-success' : 'signal-error');
+    el.style.display = 'block';
+}
 
 if (questions.length > 0) {
     displayQuestion();
