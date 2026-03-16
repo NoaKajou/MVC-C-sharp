@@ -16,11 +16,11 @@ class Utilisateur {
 
     public static function getByEmailAndPassword($email, $mdp) {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp FROM Utilisateur WHERE email = ? AND mdp = ?");
-        $stmt->execute([$email, $mdp]);
+        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp FROM Utilisateur WHERE email = ?");
+        $stmt->execute([$email]);
         $row = $stmt->fetch();
         
-        if ($row) {
+        if ($row && password_verify($mdp, $row['mdp'])) {
             return new Utilisateur($row['id'], $row['email'], $row['pseudo'], $row['mdp']);
         }
         return null;
@@ -28,11 +28,11 @@ class Utilisateur {
 
     public static function getByPseudoAndPassword($pseudo, $mdp) {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp FROM Utilisateur WHERE pseudo = ? AND mdp = ?");
-        $stmt->execute([$pseudo, $mdp]);
+        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp FROM Utilisateur WHERE pseudo = ?");
+        $stmt->execute([$pseudo]);
         $row = $stmt->fetch();
         
-        if ($row) {
+        if ($row && password_verify($mdp, $row['mdp'])) {
             return new Utilisateur($row['id'], $row['email'], $row['pseudo'], $row['mdp']);
         }
         return null;
@@ -66,7 +66,8 @@ class Utilisateur {
 
     public static function create($pseudo, $email, $mdp) {
         $pdo = Database::getConnection();
+        $hashedPassword = password_hash($mdp, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("INSERT INTO Utilisateur (pseudo, email, mdp) VALUES (?, ?, ?)");
-        return $stmt->execute([$pseudo, $email, $mdp]);
+        return $stmt->execute([$pseudo, $email, $hashedPassword]);
     }
 }
