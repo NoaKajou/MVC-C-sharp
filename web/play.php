@@ -18,6 +18,8 @@ if (!$questionnaire) {
     exit;
 }
 
+QuestionnaireController::trackQuestionnaireAccess($_SESSION['user_id'], $questionnaireId);
+
 $questions = QuestionnaireController::getQuestions($questionnaireId);
 
 $allReponses = [];

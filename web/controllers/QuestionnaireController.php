@@ -138,4 +138,42 @@ class QuestionnaireController {
             return ['correct' => false];
         }
     }
+
+    public static function checkAndStoreAnswer($utilisateurId, $questionnaireId, $questionId, $answer) {
+        $question = Question::getById($questionId);
+        if (!$question) {
+            return ['correct' => false];
+        }
+
+        $result = self::checkAnswer($questionId, $answer);
+        $isCorrect = $result['correct'] === true;
+
+        $reponseBool = null;
+        if ($question->typeReponse === 'VraiFaux') {
+            $reponseBool = $answer === 'true' ? 1 : 0;
+        }
+
+        Questionnaire::saveUserAnswer(
+            $utilisateurId,
+            $questionnaireId,
+            $questionId,
+            (string)$answer,
+            $reponseBool,
+            $isCorrect
+        );
+
+        return ['correct' => $isCorrect];
+    }
+
+    public static function getPedagogicalStats() {
+        return [
+            'questionnairesByTheme' => Questionnaire::getQuestionnaireCountByTheme(),
+            'weeklyConnections' => Questionnaire::getWeeklyUserConnections(),
+            'successByTheme' => Questionnaire::getSuccessRateByTheme()
+        ];
+    }
+
+    public static function trackQuestionnaireAccess($utilisateurId, $questionnaireId) {
+        return Questionnaire::trackQuestionnaireAccess($utilisateurId, $questionnaireId);
+    }
 }

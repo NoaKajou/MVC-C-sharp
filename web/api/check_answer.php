@@ -13,12 +13,18 @@ if (!AuthController::isLoggedIn()) {
 $data = json_decode(file_get_contents('php://input'), true);
 
 $questionId = $data['questionId'] ?? null;
+$questionnaireId = $data['questionnaireId'] ?? null;
 $answer = $data['answer'] ?? null;
 
-if (!$questionId || $answer === null) {
+if (!$questionId || !$questionnaireId || $answer === null) {
     echo json_encode(['error' => 'Paramètres manquants']);
     exit;
 }
 
-$result = QuestionnaireController::checkAnswer($questionId, $answer);
+$result = QuestionnaireController::checkAndStoreAnswer(
+    $_SESSION['user_id'],
+    (int)$questionnaireId,
+    (int)$questionId,
+    $answer
+);
 echo json_encode($result);

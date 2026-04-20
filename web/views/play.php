@@ -31,6 +31,9 @@ include 'header.php';
             <div class="result-box">
                 <h2 id="resultTitle"></h2>
                 <p id="resultScore"></p>
+                <div class="result-chart">
+                    <canvas id="resultChart" aria-label="Diagramme des bonnes et mauvaises réponses" role="img"></canvas>
+                </div>
                 <a href="questionnaires.php" class="btn btn-primary">Retour aux questionnaires</a>
             </div>
         </div>
@@ -54,6 +57,7 @@ include 'header.php';
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const questions = <?= json_encode(array_map(function($q) {
     return [
@@ -65,10 +69,12 @@ const questions = <?= json_encode(array_map(function($q) {
 }, $questions)) ?>;
 
 const reponses = <?= json_encode($allReponses) ?>;
+const questionnaireId = <?= (int)$questionnaire->id ?>;
 
 let currentIndex = 0;
 let answers = {};
 let score = 0;
+let resultChart = null;
 
 function displayQuestion() {
     const q = questions[currentIndex];
@@ -112,19 +118,49 @@ function saveAnswer() {
     }
 }
 
+function isAnswerCorrect(question, answer) {
+    if (!question || answer === undefined || answer === null) {
+        return false;
+    }
+
+    if (question.typeReponse === 'VraiFaux') {
+        const expected = question.reponseVraiFaux ? 'true' : 'false';
+        return answer === expected;
+    }
+
+    const qReponses = reponses[question.id] || [];
+    const matchedResponse = qReponses.find(r => String(r.id) === String(answer));
+    return Boolean(matchedResponse && Number(matchedResponse.estCorrecte) === 1);
+}
+
+function persistAnswer(question) {
+    const answer = answers[question.id];
+    if (!answer) {
+        return Promise.resolve();
+    }
+
+    return fetch('api/check_answer.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId: question.id, questionnaireId, answer })
+    }).catch(() => null);
+}
+
 async function calculateScore() {
     score = 0;
+    const saveTasks = [];
+
     for (const q of questions) {
-        if (answers[q.id]) {
-            const response = await fetch('api/check_answer.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ questionId: q.id, answer: answers[q.id] })
-            });
-            const result = await response.json();
-            if (result.correct) score++;
+        const answer = answers[q.id];
+        if (answer) {
+            if (isAnswerCorrect(q, answer)) {
+                score++;
+            }
+            saveTasks.push(persistAnswer(q));
         }
     }
+
+    await Promise.allSettled(saveTasks);
     
     showResult();
 }
@@ -134,10 +170,38 @@ function showResult() {
     document.getElementById('resultContainer').style.display = 'block';
     
     const percentage = Math.round((score / questions.length) * 100);
+    const wrongAnswers = questions.length - score;
     document.getElementById('resultTitle').textContent = percentage >= 50 ? 'Bravo !' : 'Dommage...';
     document.getElementById('resultScore').textContent = `Vous avez obtenu ${score}/${questions.length} (${percentage}%)`;
     
     document.querySelector('.result-box').className = 'result-box ' + (percentage >= 50 ? 'success' : 'fail');
+
+    const chartCanvas = document.getElementById('resultChart');
+    if (resultChart) {
+        resultChart.destroy();
+    }
+
+    resultChart = new Chart(chartCanvas, {
+        type: 'pie',
+        data: {
+            labels: ['Bonnes réponses', 'Mauvaises réponses'],
+            datasets: [{
+                data: [score, wrongAnswers],
+                backgroundColor: ['#1f9d55', '#d64545'],
+                borderColor: ['#ffffff', '#ffffff'],
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
 }
 
 document.getElementById('btnSuivant').addEventListener('click', () => {
