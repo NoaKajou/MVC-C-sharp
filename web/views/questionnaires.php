@@ -11,6 +11,14 @@ include 'header.php';
             <a href="logout.php" class="btn btn-danger">Se déconnecter</a>
         </div>
     </header>
+
+    <?php if (!empty($success)): ?>
+        <div class="success-message"><?= htmlspecialchars($success) ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($error)): ?>
+        <div class="error-message"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
     
     <div class="questionnaires-grid">
         <section class="questionnaire-section">
@@ -50,6 +58,7 @@ include 'header.php';
                             <div class="questionnaire-meta">
                                 <span class="theme"><?= htmlspecialchars($q->theme) ?></span>
                                 <span class="count"><?= $q->nombreQuestions ?> questions</span>
+                                <span class="count"><?= $q->estPublie ? 'Publié' : 'Brouillon' ?></span>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -60,6 +69,10 @@ include 'header.php';
                 <a href="questionnaire_edit.php" class="btn btn-primary btn-full">Nouveau questionnaire</a>
                 <div class="btn-row">
                     <button id="btnEditer" class="btn" disabled>Editer</button>
+                    <button id="btnPublier" class="btn btn-success" disabled>Publier</button>
+                </div>
+                <div class="btn-row">
+                    <button id="btnExporter" class="btn btn-warn" disabled>Exporter PDF</button>
                     <button id="btnSupprimer" class="btn btn-danger" disabled>Supprimer</button>
                 </div>
             </div>
@@ -86,6 +99,8 @@ document.querySelectorAll('#myQuestionnaires .questionnaire-card').forEach(card 
         card.classList.add('selected');
         selectedMyId = card.dataset.id;
         document.getElementById('btnEditer').disabled = false;
+        document.getElementById('btnPublier').disabled = false;
+        document.getElementById('btnExporter').disabled = false;
         document.getElementById('btnSupprimer').disabled = false;
     });
 });
@@ -99,6 +114,18 @@ document.getElementById('btnJouer').addEventListener('click', () => {
 document.getElementById('btnEditer').addEventListener('click', () => {
     if (selectedMyId) {
         window.location.href = 'questionnaire_edit.php?id=' + selectedMyId;
+    }
+});
+
+document.getElementById('btnPublier').addEventListener('click', () => {
+    if (selectedMyId) {
+        window.location.href = 'questionnaire_publish.php?id=' + selectedMyId;
+    }
+});
+
+document.getElementById('btnExporter').addEventListener('click', () => {
+    if (selectedMyId) {
+        window.location.href = 'questionnaire_export.php?id=' + selectedMyId;
     }
 });
 

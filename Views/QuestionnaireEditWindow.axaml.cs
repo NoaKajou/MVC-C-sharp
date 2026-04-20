@@ -1,8 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using MVC_C_sharp.Controllers;
 using MVC_C_sharp.Models;
+using MVC_C_sharp.Services;
 using System.Collections.ObjectModel;
 
 namespace MVC_C_sharp.Views
@@ -12,6 +14,7 @@ namespace MVC_C_sharp.Views
         private readonly int _utilisateurId;
         private readonly Questionnaire? _questionnaire;
         private readonly QuestionnaireController _controller;
+        private readonly PdfExportService _pdfExportService;
         private ObservableCollection<Question> _questions;
         private int _questionnaireId;
         private int _numeroQuestion = 1;
@@ -22,6 +25,7 @@ namespace MVC_C_sharp.Views
             _utilisateurId = utilisateurId;
             _questionnaire = questionnaire;
             _controller = new QuestionnaireController();
+            _pdfExportService = new PdfExportService();
             _questions = new ObservableCollection<Question>();
 
             InitialiserFormulaire();
@@ -63,6 +67,17 @@ namespace MVC_C_sharp.Views
                 }
 
                 ChargerQuestions();
+
+                var btnPublier = this.FindControl<Button>("BtnPublier");
+                var btnExporterPdf = this.FindControl<Button>("BtnExporterPdf");
+                if (btnPublier != null)
+                {
+                    btnPublier.IsVisible = !_questionnaire.EstPublie;
+                }
+                if (btnExporterPdf != null)
+                {
+                    btnExporterPdf.IsVisible = true;
+                }
             }
             else
             {
@@ -71,6 +86,17 @@ namespace MVC_C_sharp.Views
                 
                 if (cboTheme != null)
                     cboTheme.SelectedIndex = 0;
+
+                var btnPublier = this.FindControl<Button>("BtnPublier");
+                var btnExporterPdf = this.FindControl<Button>("BtnExporterPdf");
+                if (btnPublier != null)
+                {
+                    btnPublier.IsVisible = false;
+                }
+                if (btnExporterPdf != null)
+                {
+                    btnExporterPdf.IsVisible = false;
+                }
             }
         }
 
@@ -156,6 +182,82 @@ namespace MVC_C_sharp.Views
         private void BtnAnnuler_Click(object? sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void BtnPublier_Click(object? sender, RoutedEventArgs e)
+        {
+            var txtErreur = this.FindControl<TextBlock>("TxtErreur");
+            if (_questionnaire == null || _questionnaireId == 0)
+            {
+                if (txtErreur != null)
+                {
+                    txtErreur.Text = "Enregistrez d'abord le questionnaire avant publication.";
+                    txtErreur.IsVisible = true;
+                }
+                return;
+            }
+
+            var result = _controller.PublishQuestionnaire(_questionnaireId, _utilisateurId);
+            if (txtErreur != null)
+            {
+                txtErreur.Text = result.Message;
+                txtErreur.IsVisible = true;
+            }
+
+            if (result.Success)
+            {
+                _questionnaire.EstPublie = true;
+                var btnPublier = this.FindControl<Button>("BtnPublier");
+                if (btnPublier != null)
+                {
+                    btnPublier.IsVisible = false;
+                }
+            }
+        }
+
+        private async void BtnExporterPdf_Click(object? sender, RoutedEventArgs e)
+        {
+            var txtErreur = this.FindControl<TextBlock>("TxtErreur");
+            if (_questionnaire == null || _questionnaireId == 0)
+            {
+                if (txtErreur != null)
+                {
+                    txtErreur.Text = "Enregistrez d'abord le questionnaire avant export PDF.";
+                    txtErreur.IsVisible = true;
+                }
+                return;
+            }
+
+            var questions = _controller.GetQuestions(_questionnaireId);
+            var reponsesByQuestion = new Dictionary<int, List<Reponse>>();
+            foreach (var question in questions)
+            {
+                reponsesByQuestion[question.Id] = _controller.GetReponses(question.Id);
+            }
+
+            var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                Title = "Exporter le questionnaire en PDF",
+                SuggestedFileName = $"questionnaire-{_questionnaireId}",
+                FileTypeChoices = new List<FilePickerFileType>
+                {
+                    new("PDF") { Patterns = new[] { "*.pdf" } }
+                }
+            });
+
+            if (file == null)
+            {
+                return;
+            }
+
+            await using var stream = await file.OpenWriteAsync();
+            _pdfExportService.ExportQuestionnaire(stream, _questionnaire, questions, reponsesByQuestion);
+
+            if (txtErreur != null)
+            {
+                txtErreur.Text = "Export PDF termine.";
+                txtErreur.IsVisible = true;
+            }
         }
 
         private async void MenuAjouterQuestion_Click(object? sender, RoutedEventArgs e)

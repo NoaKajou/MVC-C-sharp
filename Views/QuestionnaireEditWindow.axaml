@@ -31,6 +31,8 @@
         </StackPanel>
         
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,20,0,0">
+            <Button Name="BtnPublier" Content="Publier" Padding="20,10" Background="#27AE60" Foreground="White" Click="BtnPublier_Click" IsVisible="False"/>
+            <Button Name="BtnExporterPdf" Content="Exporter PDF" Padding="20,10" Background="#E67E22" Foreground="White" Click="BtnExporterPdf_Click" IsVisible="False"/>
             <Button Name="BtnAnnuler" Content="Annuler" Padding="20,10" Click="BtnAnnuler_Click"/>
             <Button Name="BtnEnregistrer" Content="Enregistrer" Padding="20,10" Click="BtnEnregistrer_Click"/>
         </StackPanel>

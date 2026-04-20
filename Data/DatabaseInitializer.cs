@@ -13,6 +13,9 @@ namespace MVC_C_sharp.Data
                 return;
             }
 
+            var questionnaireRepository = new QuestionnaireRepository();
+            questionnaireRepository.EnsureFeatureSchema();
+
             var adminRepository = new AdminRepository();
             adminRepository.EnsureAdminTable();
 

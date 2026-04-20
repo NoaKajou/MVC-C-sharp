@@ -34,6 +34,15 @@ include 'header.php';
             
             <button type="submit" name="save" class="btn btn-primary">Enregistrer</button>
         </form>
+
+        <?php if (isset($questionnaire)): ?>
+            <div class="form-actions">
+                <?php if (!$questionnaire->estPublie): ?>
+                    <a href="questionnaire_publish.php?id=<?= $questionnaire->id ?>" class="btn btn-success">Publier ce questionnaire</a>
+                <?php endif; ?>
+                <a href="questionnaire_export.php?id=<?= $questionnaire->id ?>" class="btn btn-warn">Exporter en PDF</a>
+            </div>
+        <?php endif; ?>
         
         <?php if (isset($questionnaire)): ?>
         <div class="questions-section">

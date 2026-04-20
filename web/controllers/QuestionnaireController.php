@@ -13,6 +13,10 @@ class QuestionnaireController {
         return Questionnaire::getAllByUtilisateur($utilisateurId);
     }
 
+    public static function getPlayHistory($utilisateurId, $limit = 20) {
+        return Questionnaire::getPlayHistoryByUtilisateur($utilisateurId, $limit);
+    }
+
     public static function getById($id) {
         return Questionnaire::getById($id);
     }
@@ -175,5 +179,26 @@ class QuestionnaireController {
 
     public static function trackQuestionnaireAccess($utilisateurId, $questionnaireId) {
         return Questionnaire::trackQuestionnaireAccess($utilisateurId, $questionnaireId);
+    }
+
+    public static function publish($id, $utilisateurId) {
+        $questionnaire = Questionnaire::getById($id);
+        if (!$questionnaire || $questionnaire->utilisateurId != $utilisateurId) {
+            return ['success' => false, 'message' => 'Questionnaire non trouvé ou non autorisé'];
+        }
+
+        if ($questionnaire->estPublie) {
+            return ['success' => false, 'message' => 'Ce questionnaire est déjà publié'];
+        }
+
+        if ($questionnaire->nombreQuestions < 1) {
+            return ['success' => false, 'message' => 'Ajoutez au moins une question avant de publier'];
+        }
+
+        if (Questionnaire::publish($id, $utilisateurId)) {
+            return ['success' => true, 'message' => 'Questionnaire publié avec succès'];
+        }
+
+        return ['success' => false, 'message' => 'Erreur lors de la publication'];
     }
 }

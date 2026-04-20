@@ -57,6 +57,29 @@ include 'header.php';
                 </div>
             <?php endif; ?>
         </div>
+
+        <div class="profil-questionnaires">
+            <h3>Historique des questionnaires joués</h3>
+
+            <?php if (empty($history)): ?>
+                <p class="empty-message">Aucun historique pour le moment</p>
+            <?php else: ?>
+                <div class="questionnaire-list-small">
+                    <?php foreach ($history as $entry): ?>
+                        <div class="questionnaire-item">
+                            <div class="item-info">
+                                <strong><?= htmlspecialchars($entry['questionnaire_nom']) ?></strong>
+                                <span>
+                                    <?= htmlspecialchars($entry['questionnaire_theme']) ?>
+                                    - par <?= htmlspecialchars($entry['auteur_pseudo']) ?>
+                                    - joué le <?= date('d/m/Y H:i', strtotime($entry['date_connexion'])) ?>
+                                </span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 

@@ -21,6 +21,7 @@ public partial class AccountInterface : Window
         
         ChargerInformationsUtilisateur();
         ChargerQuestionnaires();
+        ChargerHistorique();
     }
 
     private void InitializeComponent()
@@ -101,6 +102,35 @@ public partial class AccountInterface : Window
                 listQuestionnaires.IsVisible = false;
                 if (txtAucunQuestionnaire != null)
                     txtAucunQuestionnaire.IsVisible = true;
+            }
+        }
+    }
+
+    private void ChargerHistorique()
+    {
+        var historique = _questionnaireController.GetPlayHistory(_utilisateur.Id, 25);
+
+        var listHistorique = this.FindControl<ListBox>("ListHistoriqueQuestionnaires");
+        var txtAucunHistorique = this.FindControl<TextBlock>("TxtAucunHistorique");
+
+        if (listHistorique != null)
+        {
+            if (historique.Count > 0)
+            {
+                listHistorique.ItemsSource = historique;
+                listHistorique.IsVisible = true;
+                if (txtAucunHistorique != null)
+                {
+                    txtAucunHistorique.IsVisible = false;
+                }
+            }
+            else
+            {
+                listHistorique.IsVisible = false;
+                if (txtAucunHistorique != null)
+                {
+                    txtAucunHistorique.IsVisible = true;
+                }
             }
         }
     }

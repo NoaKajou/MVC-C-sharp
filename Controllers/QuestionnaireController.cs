@@ -38,6 +38,11 @@ namespace MVC_C_sharp.Controllers
             return _questionnaireRepository.GetById(id);
         }
 
+        public List<HistoriqueQuestionnaire> GetPlayHistory(int utilisateurId, int limit = 25)
+        {
+            return _questionnaireRepository.GetPlayHistoryByUtilisateur(utilisateurId, limit);
+        }
+
         public int CreateQuestionnaire(string nom, string theme, int utilisateurId)
         {
             int questionnaireId = _questionnaireRepository.Create(nom, theme, utilisateurId);
@@ -79,6 +84,45 @@ namespace MVC_C_sharp.Controllers
             }
 
             return deleted;
+        }
+
+        public (bool Success, string Message) PublishQuestionnaire(int id, int utilisateurId)
+        {
+            var questionnaire = _questionnaireRepository.GetById(id);
+            if (questionnaire == null || questionnaire.UtilisateurId != utilisateurId)
+            {
+                return (false, "Questionnaire non trouve ou non autorise.");
+            }
+
+            if (questionnaire.EstPublie)
+            {
+                return (false, "Ce questionnaire est deja publie.");
+            }
+
+            if (questionnaire.NombreQuestions < 1)
+            {
+                return (false, "Ajoutez au moins une question avant de publier.");
+            }
+
+            bool published = _questionnaireRepository.Publish(id, utilisateurId);
+            if (!published)
+            {
+                return (false, "Erreur lors de la publication.");
+            }
+
+            string pseudo = GetUtilisateurPseudo(utilisateurId);
+            _adminLogRepository.CreateLog(
+                utilisateurId,
+                "QUESTIONNAIRE_PUBLIE",
+                $"Le questionnaire '{questionnaire.Nom}' (theme : {questionnaire.Theme}) a ete publie par '{pseudo}'."
+            );
+
+            return (true, "Questionnaire publie avec succes.");
+        }
+
+        public bool TrackQuestionnaireAccess(int utilisateurId, int questionnaireId)
+        {
+            return _questionnaireRepository.TrackQuestionnaireAccess(utilisateurId, questionnaireId);
         }
 
         public void LogQuestionnaireCompletion(int utilisateurId, Questionnaire questionnaire, int score, int total)

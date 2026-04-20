@@ -19,6 +19,8 @@ CREATE TABLE Questionnaire (
     nom VARCHAR(255) NOT NULL,
     theme VARCHAR(100) NOT NULL,
     utilisateur_id INT NOT NULL,
+    est_publie TINYINT(1) NOT NULL DEFAULT 0,
+    date_publication DATETIME NULL DEFAULT NULL,
     PRIMARY KEY (id),
     INDEX idx_questionnaire_user (utilisateur_id),
     CONSTRAINT fk_questionnaire_utilisateur
@@ -174,8 +176,8 @@ INSERT INTO Utilisateur (id, pseudo, email, mdp) VALUES
 
 INSERT INTO Admin (utilisateur_id) VALUES (1);
 
-INSERT INTO Questionnaire (id, nom, theme, utilisateur_id) VALUES
-    (1, 'Quiz Reseau', 'Réseau', 1);
+INSERT INTO Questionnaire (id, nom, theme, utilisateur_id, est_publie, date_publication) VALUES
+    (1, 'Quiz Reseau', 'Réseau', 1, 1, NOW());
 
 INSERT INTO Question (id, questionnaire_id, numero, libelle, type_reponse, reponse_vrai_faux) VALUES
     (1, 1, 1, '192.168.1.1 est-elle une adresse IP privee ?', 'VraiFaux', 1),

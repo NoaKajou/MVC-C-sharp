@@ -7,20 +7,28 @@ class Questionnaire {
     public $theme;
     public $utilisateurId;
     public $nombreQuestions;
+    public $estPublie;
+    public $datePublication;
 
-    public function __construct($id = null, $nom = '', $theme = '', $utilisateurId = null, $nombreQuestions = 0) {
+    public function __construct($id = null, $nom = '', $theme = '', $utilisateurId = null, $nombreQuestions = 0, $estPublie = false, $datePublication = null) {
         $this->id = $id;
         $this->nom = $nom;
         $this->theme = $theme;
         $this->utilisateurId = $utilisateurId;
         $this->nombreQuestions = $nombreQuestions;
+        $this->estPublie = (bool)$estPublie;
+        $this->datePublication = $datePublication;
     }
 
     public static function getAll() {
         $pdo = Database::getConnection();
+        self::ensurePublicationColumns();
+
         $stmt = $pdo->query("SELECT q.id, q.nom, q.theme, q.utilisateur_id,
+                            q.est_publie, q.date_publication,
                             (SELECT COUNT(*) FROM Question WHERE questionnaire_id = q.id) as nb_questions
-                            FROM Questionnaire q");
+                            FROM Questionnaire q
+                            WHERE q.est_publie = 1");
         
         $questionnaires = [];
         while ($row = $stmt->fetch()) {
@@ -29,7 +37,9 @@ class Questionnaire {
                 $row['nom'],
                 $row['theme'],
                 $row['utilisateur_id'],
-                $row['nb_questions']
+                $row['nb_questions'],
+                $row['est_publie'],
+                $row['date_publication']
             );
         }
         return $questionnaires;
@@ -37,9 +47,14 @@ class Questionnaire {
 
     public static function getAllByUtilisateur($utilisateurId) {
         $pdo = Database::getConnection();
+        self::ensurePublicationColumns();
+
         $stmt = $pdo->prepare("SELECT q.id, q.nom, q.theme, q.utilisateur_id,
+                              q.est_publie, q.date_publication,
                               (SELECT COUNT(*) FROM Question WHERE questionnaire_id = q.id) as nb_questions
-                              FROM Questionnaire q WHERE q.utilisateur_id = ?");
+                              FROM Questionnaire q
+                              WHERE q.utilisateur_id = ?
+                              ORDER BY q.id DESC");
         $stmt->execute([$utilisateurId]);
         
         $questionnaires = [];
@@ -49,7 +64,9 @@ class Questionnaire {
                 $row['nom'],
                 $row['theme'],
                 $row['utilisateur_id'],
-                $row['nb_questions']
+                $row['nb_questions'],
+                $row['est_publie'],
+                $row['date_publication']
             );
         }
         return $questionnaires;
@@ -57,7 +74,10 @@ class Questionnaire {
 
     public static function getById($id) {
         $pdo = Database::getConnection();
+        self::ensurePublicationColumns();
+
         $stmt = $pdo->prepare("SELECT q.id, q.nom, q.theme, q.utilisateur_id,
+                              q.est_publie, q.date_publication,
                               (SELECT COUNT(*) FROM Question WHERE questionnaire_id = q.id) as nb_questions
                               FROM Questionnaire q WHERE q.id = ?");
         $stmt->execute([$id]);
@@ -69,7 +89,9 @@ class Questionnaire {
                 $row['nom'],
                 $row['theme'],
                 $row['utilisateur_id'],
-                $row['nb_questions']
+                $row['nb_questions'],
+                $row['est_publie'],
+                $row['date_publication']
             );
         }
         return null;
@@ -77,7 +99,9 @@ class Questionnaire {
 
     public static function create($nom, $theme, $utilisateurId) {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("INSERT INTO Questionnaire (nom, theme, utilisateur_id) VALUES (?, ?, ?)");
+        self::ensurePublicationColumns();
+
+        $stmt = $pdo->prepare("INSERT INTO Questionnaire (nom, theme, utilisateur_id, est_publie, date_publication) VALUES (?, ?, ?, 0, NULL)");
         $stmt->execute([$nom, $theme, $utilisateurId]);
         return $pdo->lastInsertId();
     }
@@ -200,6 +224,39 @@ class Questionnaire {
         ]);
     }
 
+    public static function publish($id, $utilisateurId) {
+        $pdo = Database::getConnection();
+        self::ensurePublicationColumns();
+
+        $stmt = $pdo->prepare("UPDATE Questionnaire
+                               SET est_publie = 1,
+                                   date_publication = COALESCE(date_publication, NOW())
+                               WHERE id = ?
+                                 AND utilisateur_id = ?");
+        return $stmt->execute([$id, $utilisateurId]);
+    }
+
+    public static function getPlayHistoryByUtilisateur($utilisateurId, $limit = 20) {
+        $pdo = Database::getConnection();
+        self::ensureAccessLogTable();
+
+        $limit = max(1, (int)$limit);
+
+        $stmt = $pdo->prepare("SELECT q.id AS questionnaire_id,
+                                      q.nom AS questionnaire_nom,
+                                      q.theme AS questionnaire_theme,
+                                      qc.date_connexion,
+                                      u.pseudo AS auteur_pseudo
+                               FROM QuestionnaireConnexion qc
+                               INNER JOIN Questionnaire q ON q.id = qc.questionnaire_id
+                               INNER JOIN Utilisateur u ON u.id = q.utilisateur_id
+                               WHERE qc.utilisateur_id = ?
+                               ORDER BY qc.date_connexion DESC
+                               LIMIT " . $limit);
+        $stmt->execute([$utilisateurId]);
+        return $stmt->fetchAll();
+    }
+
     public static function trackQuestionnaireAccess($utilisateurId, $questionnaireId) {
         $pdo = Database::getConnection();
         self::ensureAccessLogTable();
@@ -222,5 +279,27 @@ class Questionnaire {
             CONSTRAINT fk_qconn_user FOREIGN KEY (utilisateur_id) REFERENCES Utilisateur(id) ON DELETE CASCADE ON UPDATE CASCADE,
             CONSTRAINT fk_qconn_questionnaire FOREIGN KEY (questionnaire_id) REFERENCES Questionnaire(id) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+
+    private static function ensurePublicationColumns() {
+        $pdo = Database::getConnection();
+
+        if (!self::hasColumn($pdo, 'Questionnaire', 'est_publie')) {
+            $pdo->exec("ALTER TABLE Questionnaire ADD COLUMN est_publie TINYINT(1) NOT NULL DEFAULT 0");
+        }
+
+        if (!self::hasColumn($pdo, 'Questionnaire', 'date_publication')) {
+            $pdo->exec("ALTER TABLE Questionnaire ADD COLUMN date_publication DATETIME NULL DEFAULT NULL");
+        }
+    }
+
+    private static function hasColumn($pdo, $tableName, $columnName) {
+        $stmt = $pdo->prepare("SELECT COUNT(*)
+                               FROM information_schema.columns
+                               WHERE table_schema = DATABASE()
+                                 AND table_name = ?
+                                 AND column_name = ?");
+        $stmt->execute([$tableName, $columnName]);
+        return (int)$stmt->fetchColumn() > 0;
     }
 }

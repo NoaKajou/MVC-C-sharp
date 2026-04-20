@@ -86,3 +86,8 @@
 /home/noa/Documents/GitHub/MVC-C-sharp/obj/Debug/net9.0/ref/MVC-C-sharp.dll
 /home/noa/Documents/GitHub/MVC-C-sharp/obj/Debug/net9.0/MVC-C-sharp.sourcelink.json
 /home/noa/Documents/GitHub/MVC-C-sharp/bin/Debug/net9.0/BCrypt.Net-Next.dll
+/home/noa/Documents/GitHub/MVC-C-sharp/bin/Debug/net9.0/PdfSharpCore.dll
+/home/noa/Documents/GitHub/MVC-C-sharp/bin/Debug/net9.0/ICSharpCode.SharpZipLib.dll
+/home/noa/Documents/GitHub/MVC-C-sharp/bin/Debug/net9.0/SixLabors.Fonts.dll
+/home/noa/Documents/GitHub/MVC-C-sharp/bin/Debug/net9.0/SixLabors.ImageSharp.dll
+/home/noa/Documents/GitHub/MVC-C-sharp/bin/Debug/net9.0/de/PdfSharpCore.resources.dll
