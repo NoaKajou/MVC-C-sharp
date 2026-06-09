@@ -22,6 +22,31 @@ $reponsesByQuestion = [];
 foreach ($questions as $question) {
     $reponsesByQuestion[$question->id] = QuestionnaireController::getReponses($question->id);
 }
+
+$exportPageData = [
+    'questionnaire' => [
+        'nom' => $questionnaire->nom,
+        'theme' => $questionnaire->theme,
+        'estPublie' => $questionnaire->estPublie,
+    ],
+    'questions' => array_map(static function ($question) {
+        return [
+            'id' => $question->id,
+            'numero' => $question->numero,
+            'libelle' => $question->libelle,
+            'typeReponse' => $question->typeReponse,
+            'reponseVraiFaux' => (bool)$question->reponseVraiFaux,
+        ];
+    }, $questions),
+    'reponsesByQuestion' => array_map(static function ($reponses) {
+        return array_map(static function ($reponse) {
+            return [
+                'valeur' => $reponse->valeur,
+                'estCorrecte' => (bool)$reponse->estCorrecte,
+            ];
+        }, $reponses);
+    }, $reponsesByQuestion),
+];
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -29,7 +54,12 @@ foreach ($questions as $question) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Export PDF - <?= htmlspecialchars($questionnaire->nom) ?></title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
+        [v-cloak] {
+            display: none;
+        }
+
         body {
             font-family: Arial, sans-serif;
             color: #1f2d3d;
@@ -112,46 +142,51 @@ foreach ($questions as $question) {
     </style>
 </head>
 <body>
-    <div class="screen-actions">
-        <a href="questionnaires.php" class="btn">Retour</a>
-        <button type="button" class="btn btn-print" onclick="window.print()">Générer le PDF</button>
+    <div id="exportApp" v-cloak>
+        <div class="screen-actions">
+            <a href="questionnaires.php" class="btn">Retour</a>
+            <button type="button" class="btn btn-print" @click="printPage">Générer le PDF</button>
+        </div>
+
+        <h1>{{ questionnaire.nom }}</h1>
+        <p class="meta">
+            Thème : {{ questionnaire.theme }}
+            | Questions : {{ questions.length }}
+            | Statut : {{ questionnaire.estPublie ? 'Publié' : 'Brouillon' }}
+        </p>
+
+        <p v-if="questions.length === 0">Aucune question à exporter.</p>
+        <div v-else>
+            <div v-for="question in questions" :key="question.id" class="question-block">
+                <div class="question-title">Question {{ question.numero }} : {{ question.libelle }}</div>
+
+                <p v-if="question.typeReponse === 'VraiFaux'" class="bool-answer">
+                    Réponse attendue : {{ question.reponseVraiFaux ? 'Vrai' : 'Faux' }}
+                </p>
+                <ul v-else-if="reponsesByQuestion[question.id] && reponsesByQuestion[question.id].length > 0">
+                    <li v-for="(reponse, index) in reponsesByQuestion[question.id]" :key="index">
+                        {{ reponse.valeur }}
+                        <span v-if="reponse.estCorrecte" class="correct">(Correcte)</span>
+                    </li>
+                </ul>
+                <p v-else>Aucune réponse configurée.</p>
+            </div>
+        </div>
     </div>
 
-    <h1><?= htmlspecialchars($questionnaire->nom) ?></h1>
-    <p class="meta">
-        Thème : <?= htmlspecialchars($questionnaire->theme) ?>
-        | Questions : <?= count($questions) ?>
-        | Statut : <?= $questionnaire->estPublie ? 'Publié' : 'Brouillon' ?>
-    </p>
-
-    <?php if (empty($questions)): ?>
-        <p>Aucune question à exporter.</p>
-    <?php else: ?>
-        <?php foreach ($questions as $question): ?>
-            <div class="question-block">
-                <div class="question-title">Question <?= (int)$question->numero ?> : <?= htmlspecialchars($question->libelle) ?></div>
-
-                <?php if ($question->typeReponse === 'VraiFaux'): ?>
-                    <p class="bool-answer">
-                        Réponse attendue : <?= $question->reponseVraiFaux ? 'Vrai' : 'Faux' ?>
-                    </p>
-                <?php else: ?>
-                    <?php $reponses = $reponsesByQuestion[$question->id] ?? []; ?>
-                    <?php if (!empty($reponses)): ?>
-                        <ul>
-                            <?php foreach ($reponses as $reponse): ?>
-                                <li>
-                                    <?= htmlspecialchars($reponse->valeur) ?>
-                                    <?= $reponse->estCorrecte ? '<span class="correct">(Correcte)</span>' : '' ?>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php else: ?>
-                        <p>Aucune réponse configurée.</p>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
+    <script>
+    window.__EXPORT_PAGE__ = <?= json_encode($exportPageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    const exportApp = Vue.createApp({
+        data() {
+            return window.__EXPORT_PAGE__;
+        },
+        methods: {
+            printPage() {
+                window.print();
+            }
+        }
+    });
+    exportApp.mount('#exportApp');
+    </script>
 </body>
 </html>

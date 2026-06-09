@@ -1,45 +1,48 @@
 <?php
 $title = 'Inscription';
+$registerPageData = [
+    'error' => $error ?? null,
+    'success' => $success ?? null,
+];
 include 'header.php';
 ?>
 
-<div class="auth-container">
+<div class="auth-container" id="registerApp" v-cloak>
     <h1>QUESTIONNAIRE</h1>
     <p class="subtitle">Créez votre compte</p>
     
-    <?php if (isset($error)): ?>
-        <div class="error-message"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-    
-    <?php if (isset($success)): ?>
-        <div class="success-message"><?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
+    <div v-if="error" class="error-message">{{ error }}</div>
+    <div v-if="success" class="success-message">{{ success }}</div>
     
     <form method="POST" action="../register.php">
         <div class="form-group">
             <label>Pseudo</label>
-            <input type="text" name="pseudo" placeholder="Entrez votre pseudo" required>
+            <input type="text" name="pseudo" v-model="pseudo" placeholder="Entrez votre pseudo" required>
         </div>
         
         <div class="form-group">
             <label>Email</label>
-            <input type="email" name="email" placeholder="Entrez votre email" required>
+            <input type="email" name="email" v-model="email" placeholder="Entrez votre email" required>
         </div>
         
         <div class="form-group">
             <label>Mot de passe</label>
-            <input type="password" name="mdp" placeholder="Entrez votre mot de passe" required>
+            <input type="password" name="mdp" v-model="mdp" placeholder="Entrez votre mot de passe" required>
         </div>
         
         <div class="form-group">
             <label>Confirmer le mot de passe</label>
-            <input type="password" name="confirm_mdp" placeholder="Confirmez votre mot de passe" required>
+            <input type="password" name="confirm_mdp" v-model="confirmMdp" placeholder="Confirmez votre mot de passe" required>
         </div>
         
-        <button type="submit" name="register" class="btn btn-primary btn-full">S'inscrire</button>
+        <button type="submit" name="register" class="btn btn-primary btn-full" :disabled="!canSubmit">S'inscrire</button>
     </form>
     
     <a href="../index.php" class="btn btn-link">Déjà un compte ? Se connecter</a>
 </div>
+
+<script>
+window.__REGISTER_PAGE__ = <?= json_encode($registerPageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+</script>
 
 <?php include 'footer.php'; ?>

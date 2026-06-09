@@ -1,13 +1,16 @@
 <?php
 $title = 'Accueil';
+$accueilPageData = [
+    'userPseudo' => $_SESSION['user_pseudo'] ?? '',
+];
 include 'header.php';
 ?>
 
-<div class="main-layout">
+<div class="main-layout" id="accueilApp" v-cloak>
     <header class="top-bar">
         <h1>QUESTIONNAIRE - Accueil</h1>
         <div class="user-info">
-            <span><?= htmlspecialchars($_SESSION['user_pseudo']) ?></span>
+            <span>{{ userPseudo }}</span>
             <a href="logout.php" class="btn btn-danger">Se déconnecter</a>
         </div>
     </header>
@@ -20,10 +23,14 @@ include 'header.php';
         </aside>
         
         <main class="main-content">
-            <h2>Bienvenue, <?= htmlspecialchars($_SESSION['user_pseudo']) ?> !</h2>
+            <h2>Bienvenue, {{ userPseudo }} !</h2>
             <p>Sélectionnez une option dans le menu de gauche pour commencer.</p>
         </main>
     </div>
 </div>
+
+<script>
+window.__ACCUEIL_PAGE__ = <?= json_encode($accueilPageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+</script>
 
 <?php include 'footer.php'; ?>

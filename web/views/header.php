@@ -7,4 +7,8 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div class="db-status-bar">
+        <span class="db-status-label">Base en ligne :</span>
+        <span id="dbStatusBadge" class="db-status-badge db-status-loading">Vérification...</span>
+    </div>
     <div class="container">

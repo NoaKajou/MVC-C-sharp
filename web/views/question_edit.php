@@ -1,75 +1,85 @@
 <?php
 $title = isset($question) ? 'Éditer la question' : 'Nouvelle question';
+$questionEditPageData = [
+    'questionnaireId' => (int)$questionnaireId,
+    'question' => isset($question) ? [
+        'id' => $question->id,
+        'libelle' => $question->libelle,
+        'typeReponse' => $question->typeReponse,
+        'reponseVraiFaux' => (bool)$question->reponseVraiFaux,
+    ] : null,
+    'reponses' => array_map(static function ($reponse) {
+        return [
+            'valeur' => $reponse->valeur,
+            'estCorrecte' => $reponse->estCorrecte,
+        ];
+    }, $reponses ?? []),
+    'error' => $error ?? null,
+];
 include 'header.php';
 ?>
 
-<div class="page-container">
+<div class="page-container" id="questionEditApp" v-cloak>
     <header class="top-bar">
-        <h1><?= isset($question) ? 'Éditer la question' : 'Nouvelle question' ?></h1>
+        <h1>{{ question ? 'Éditer la question' : 'Nouvelle question' }}</h1>
         <div class="header-actions">
             <a href="questionnaire_edit.php?id=<?= $questionnaireId ?>" class="btn">Retour</a>
         </div>
     </header>
     
-    <?php if (isset($error)): ?>
-        <div class="error-message"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
+    <div v-if="error" class="error-message">{{ error }}</div>
     
     <div class="edit-container">
         <form method="POST" class="question-form" id="questionForm">
-            <input type="hidden" name="questionnaire_id" value="<?= $questionnaireId ?>">
+            <input type="hidden" name="questionnaire_id" :value="questionnaireId">
             
             <div class="form-group">
                 <label>Libellé de la question</label>
-                <textarea name="libelle" rows="3" placeholder="Ex: 192.1024.3.3 est-elle une adresse IP valide ?" required><?= htmlspecialchars($question->libelle ?? '') ?></textarea>
+                <textarea name="libelle" v-model="libelle" rows="3" placeholder="Ex: 192.1024.3.3 est-elle une adresse IP valide ?" required></textarea>
             </div>
             
             <div class="form-group">
                 <label>Type de réponse</label>
-                <select name="type_reponse" id="typeReponse" required>
-                    <option value="VraiFaux" <?= (!isset($question) || $question->typeReponse === 'VraiFaux') ? 'selected' : '' ?>>Vrai/Faux</option>
-                    <option value="ListeValeurs" <?= (isset($question) && $question->typeReponse === 'ListeValeurs') ? 'selected' : '' ?>>Liste de valeurs</option>
+                <select name="type_reponse" v-model="typeReponse" required>
+                    <option value="VraiFaux">Vrai/Faux</option>
+                    <option value="ListeValeurs">Liste de valeurs</option>
                 </select>
             </div>
             
-            <div id="panelVraiFaux" class="form-group">
+            <div v-if="showVraiFauxPanel" class="form-group">
                 <label>Réponse correcte</label>
                 <div class="radio-group">
                     <label class="radio-label">
-                        <input type="radio" name="reponse_vrai_faux" value="1" <?= (isset($question) && $question->reponseVraiFaux) ? 'checked' : '' ?>>
+                        <input type="radio" name="reponse_vrai_faux" value="1" v-model="reponseVraiFaux">
                         Vrai
                     </label>
                     <label class="radio-label">
-                        <input type="radio" name="reponse_vrai_faux" value="0" <?= (!isset($question) || !$question->reponseVraiFaux) ? 'checked' : '' ?>>
+                        <input type="radio" name="reponse_vrai_faux" value="0" v-model="reponseVraiFaux">
                         Faux
                     </label>
                 </div>
             </div>
             
-            <div id="panelListeValeurs" class="form-group" style="display: none;">
+            <div v-if="showListePanel" class="form-group">
                 <label>Valeurs possibles</label>
                 
                 <div class="add-reponse-row">
-                    <input type="text" id="nouvelleValeur" placeholder="Nouvelle valeur">
+                    <input type="text" v-model="nouvelleValeur" placeholder="Nouvelle valeur">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="estCorrecte">
+                        <input type="checkbox" v-model="estCorrecte">
                         Correcte
                     </label>
-                    <button type="button" id="btnAjouterValeur" class="btn">Ajouter</button>
+                    <button type="button" class="btn" @click="addResponse">Ajouter</button>
                 </div>
                 
-                <div id="reponsesContainer">
-                    <?php if (isset($reponses) && !empty($reponses)): ?>
-                        <?php foreach ($reponses as $index => $r): ?>
-                            <div class="reponse-item">
-                                <input type="hidden" name="reponses[<?= $index ?>][valeur]" value="<?= htmlspecialchars($r->valeur) ?>">
-                                <input type="hidden" name="reponses[<?= $index ?>][estCorrecte]" value="<?= $r->estCorrecte ? '1' : '0' ?>">
-                                <span class="reponse-valeur"><?= htmlspecialchars($r->valeur) ?></span>
-                                <span class="reponse-correcte"><?= $r->estCorrecte ? 'Correcte' : '' ?></span>
-                                <button type="button" class="btn btn-small btn-danger btn-remove">X</button>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                <div>
+                    <div v-for="(response, index) in responses" :key="index" class="reponse-item">
+                        <input type="hidden" :name="`reponses[${index}][valeur]`" :value="response.valeur">
+                        <input type="hidden" :name="`reponses[${index}][estCorrecte]`" :value="response.estCorrecte">
+                        <span class="reponse-valeur">{{ response.valeur }}</span>
+                        <span class="reponse-correcte">{{ response.estCorrecte === '1' ? 'Correcte' : '' }}</span>
+                        <button type="button" class="btn btn-small btn-danger btn-remove" @click="removeResponse(index)">X</button>
+                    </div>
                 </div>
             </div>
             
@@ -82,53 +92,7 @@ include 'header.php';
 </div>
 
 <script>
-let reponseIndex = <?= isset($reponses) ? count($reponses) : 0 ?>;
-
-const typeReponse = document.getElementById('typeReponse');
-const panelVraiFaux = document.getElementById('panelVraiFaux');
-const panelListeValeurs = document.getElementById('panelListeValeurs');
-
-function togglePanels() {
-    if (typeReponse.value === 'VraiFaux') {
-        panelVraiFaux.style.display = 'block';
-        panelListeValeurs.style.display = 'none';
-    } else {
-        panelVraiFaux.style.display = 'none';
-        panelListeValeurs.style.display = 'block';
-    }
-}
-
-typeReponse.addEventListener('change', togglePanels);
-togglePanels();
-
-document.getElementById('btnAjouterValeur').addEventListener('click', () => {
-    const valeur = document.getElementById('nouvelleValeur').value.trim();
-    const estCorrecte = document.getElementById('estCorrecte').checked;
-    
-    if (valeur) {
-        const container = document.getElementById('reponsesContainer');
-        const div = document.createElement('div');
-        div.className = 'reponse-item';
-        div.innerHTML = `
-            <input type="hidden" name="reponses[${reponseIndex}][valeur]" value="${valeur}">
-            <input type="hidden" name="reponses[${reponseIndex}][estCorrecte]" value="${estCorrecte ? '1' : '0'}">
-            <span class="reponse-valeur">${valeur}</span>
-            <span class="reponse-correcte">${estCorrecte ? 'Correcte' : ''}</span>
-            <button type="button" class="btn btn-small btn-danger btn-remove">X</button>
-        `;
-        container.appendChild(div);
-        
-        reponseIndex++;
-        document.getElementById('nouvelleValeur').value = '';
-        document.getElementById('estCorrecte').checked = false;
-    }
-});
-
-document.getElementById('reponsesContainer').addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-remove')) {
-        e.target.closest('.reponse-item').remove();
-    }
-});
+window.__QUESTION_EDIT_PAGE__ = <?= json_encode($questionEditPageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 </script>
 
 <?php include 'footer.php'; ?>

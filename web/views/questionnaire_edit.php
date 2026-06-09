@@ -1,89 +1,97 @@
 <?php
 $title = isset($questionnaire) ? 'Éditer - ' . $questionnaire->nom : 'Nouveau questionnaire';
+$questionnaireEditPageData = [
+    'questionnaire' => isset($questionnaire) ? [
+        'id' => $questionnaire->id,
+        'nom' => $questionnaire->nom,
+        'theme' => $questionnaire->theme,
+        'estPublie' => $questionnaire->estPublie,
+    ] : null,
+    'questions' => array_map(static function ($question) {
+        return [
+            'id' => $question->id,
+            'numero' => $question->numero,
+            'libelle' => $question->libelle,
+            'typeReponse' => $question->typeReponse,
+        ];
+    }, $questions ?? []),
+    'error' => $error ?? null,
+];
 include 'header.php';
 ?>
 
-<div class="page-container">
+<div class="page-container" id="questionnaireEditApp" v-cloak>
     <header class="top-bar">
-        <h1><?= isset($questionnaire) ? 'Éditer le questionnaire' : 'Nouveau questionnaire' ?></h1>
+        <h1>{{ isEditing ? 'Éditer le questionnaire' : 'Nouveau questionnaire' }}</h1>
         <div class="header-actions">
             <a href="questionnaires.php" class="btn">Retour</a>
         </div>
     </header>
     
-    <?php if (isset($error)): ?>
-        <div class="error-message"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
+    <div v-if="error" class="error-message">{{ error }}</div>
     
     <div class="edit-container">
         <form method="POST" class="questionnaire-form">
             <div class="form-group">
                 <label>Nom du questionnaire</label>
-                <input type="text" name="nom" value="<?= htmlspecialchars($questionnaire->nom ?? '') ?>" placeholder="Nom du questionnaire" required>
+                <input type="text" name="nom" v-model="questionnaire.nom" placeholder="Nom du questionnaire" required>
             </div>
             
             <div class="form-group">
                 <label>Thème</label>
-                <select name="theme" required>
+                <select name="theme" v-model="questionnaire.theme" required>
                     <option value="">Sélectionnez un thème</option>
-                    <option value="Développement" <?= (isset($questionnaire) && $questionnaire->theme === 'Développement') ? 'selected' : '' ?>>Développement</option>
-                    <option value="Réseau" <?= (isset($questionnaire) && $questionnaire->theme === 'Réseau') ? 'selected' : '' ?>>Réseau</option>
-                    <option value="Culture générale" <?= (isset($questionnaire) && $questionnaire->theme === 'Culture générale') ? 'selected' : '' ?>>Culture générale</option>
+                    <option value="Développement">Développement</option>
+                    <option value="Réseau">Réseau</option>
+                    <option value="Culture générale">Culture générale</option>
                 </select>
             </div>
             
             <button type="submit" name="save" class="btn btn-primary">Enregistrer</button>
         </form>
 
-        <?php if (isset($questionnaire)): ?>
-            <div class="form-actions">
-                <?php if (!$questionnaire->estPublie): ?>
-                    <a href="questionnaire_publish.php?id=<?= $questionnaire->id ?>" class="btn btn-success">Publier ce questionnaire</a>
-                <?php endif; ?>
-                <a href="questionnaire_export.php?id=<?= $questionnaire->id ?>" class="btn btn-warn">Exporter en PDF</a>
-            </div>
-        <?php endif; ?>
+        <div v-if="isEditing" class="form-actions">
+            <a v-if="!questionnaire.estPublie" :href="'questionnaire_publish.php?id=' + questionnaire.id" class="btn btn-success">Publier ce questionnaire</a>
+            <a :href="'questionnaire_export.php?id=' + questionnaire.id" class="btn btn-warn">Exporter en PDF</a>
+        </div>
         
-        <?php if (isset($questionnaire)): ?>
-        <div class="questions-section">
+        <div v-if="isEditing" class="questions-section">
             <h2>Questions</h2>
             
             <div class="questions-actions">
-                <a href="question_edit.php?questionnaire_id=<?= $questionnaire->id ?>" class="btn btn-primary">Ajouter une question</a>
+                <a :href="'question_edit.php?questionnaire_id=' + questionnaire.id" class="btn btn-primary">Ajouter une question</a>
             </div>
             
             <div class="questions-list">
-                <?php if (empty($questions)): ?>
-                    <p class="empty-message">Aucune question</p>
-                <?php else: ?>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>N°</th>
-                                <th>Question</th>
-                                <th>Type</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($questions as $q): ?>
-                                <tr>
-                                    <td><?= $q->numero ?></td>
-                                    <td><?= htmlspecialchars($q->libelle) ?></td>
-                                    <td><?= $q->typeReponse ?></td>
-                                    <td>
-                                        <a href="question_edit.php?id=<?= $q->id ?>&questionnaire_id=<?= $questionnaire->id ?>" class="btn btn-small">Éditer</a>
-                                        <a href="question_delete.php?id=<?= $q->id ?>&questionnaire_id=<?= $questionnaire->id ?>" class="btn btn-small btn-danger" onclick="return confirm('Supprimer cette question ?')">Supprimer</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
+                <p v-if="questions.length === 0" class="empty-message">Aucune question</p>
+                <table v-else class="data-table">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Question</th>
+                            <th>Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="question in questions" :key="question.id">
+                            <td>{{ question.numero }}</td>
+                            <td>{{ question.libelle }}</td>
+                            <td>{{ question.typeReponse }}</td>
+                            <td>
+                                <a :href="'question_edit.php?id=' + question.id + '&questionnaire_id=' + questionnaire.id" class="btn btn-small">Éditer</a>
+                                <a :href="'question_delete.php?id=' + question.id + '&questionnaire_id=' + questionnaire.id" class="btn btn-small btn-danger" onclick="return confirm('Supprimer cette question ?')">Supprimer</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <?php endif; ?>
     </div>
 </div>
+
+<script>
+window.__QUESTIONNAIRE_EDIT_PAGE__ = <?= json_encode($questionnaireEditPageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+</script>
 
 <?php include 'footer.php'; ?>
