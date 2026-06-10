@@ -6,46 +6,48 @@ class Utilisateur {
     public $email;
     public $pseudo;
     public $mdp;
+    public $idrole;
 
-    public function __construct($id = null, $email = '', $pseudo = '', $mdp = '') {
+    public function __construct($id = null, $email = '', $pseudo = '', $mdp = '', $idrole = null) {
         $this->id = $id;
         $this->email = $email;
         $this->pseudo = $pseudo;
         $this->mdp = $mdp;
+        $this->idrole = $idrole;
     }
 
     public static function getByEmailAndPassword($email, $mdp) {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp FROM Utilisateur WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp, idrole FROM Utilisateur WHERE email = ?");
         $stmt->execute([$email]);
         $row = $stmt->fetch();
         
         if ($row && password_verify($mdp, $row['mdp'])) {
-            return new Utilisateur($row['id'], $row['email'], $row['pseudo'], $row['mdp']);
+            return new Utilisateur($row['id'], $row['email'], $row['pseudo'], $row['mdp'], $row['idrole']);
         }
         return null;
     }
 
     public static function getByPseudoAndPassword($pseudo, $mdp) {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp FROM Utilisateur WHERE pseudo = ?");
+        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp, idrole FROM Utilisateur WHERE pseudo = ?");
         $stmt->execute([$pseudo]);
         $row = $stmt->fetch();
         
         if ($row && password_verify($mdp, $row['mdp'])) {
-            return new Utilisateur($row['id'], $row['email'], $row['pseudo'], $row['mdp']);
+            return new Utilisateur($row['id'], $row['email'], $row['pseudo'], $row['mdp'], $row['idrole']);
         }
         return null;
     }
 
     public static function getById($id) {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp FROM Utilisateur WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT id, email, pseudo, mdp, idrole FROM Utilisateur WHERE id = ?");
         $stmt->execute([$id]);
         $row = $stmt->fetch();
         
         if ($row) {
-            return new Utilisateur($row['id'], $row['email'], $row['pseudo'], $row['mdp']);
+            return new Utilisateur($row['id'], $row['email'], $row['pseudo'], $row['mdp'], $row['idrole']);
         }
         return null;
     }
@@ -64,10 +66,10 @@ class Utilisateur {
         return $stmt->fetchColumn() > 0;
     }
 
-    public static function create($pseudo, $email, $mdp) {
+    public static function create($pseudo, $email, $mdp, $idrole) {
         $pdo = Database::getConnection();
         $hashedPassword = password_hash($mdp, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("INSERT INTO Utilisateur (pseudo, email, mdp) VALUES (?, ?, ?)");
-        return $stmt->execute([$pseudo, $email, $hashedPassword]);
+        $stmt = $pdo->prepare("INSERT INTO Utilisateur (pseudo, email, mdp, idrole) VALUES (?, ?, ?, ?)");
+        return $stmt->execute([$pseudo, $email, $hashedPassword, $idrole]);
     }
 }

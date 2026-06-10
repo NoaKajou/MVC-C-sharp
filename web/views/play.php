@@ -74,28 +74,25 @@ include 'header.php';
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modale signalement -->
-<div v-if="modalVisible" id="modalSignalement" class="modal-overlay">
-    <div class="modal-box">
-        <h3>Signaler un problème</h3>
-        <p class="modal-subtitle">« {{ currentQuestion ? currentQuestion.libelle : '' }} »</p>
-        <div class="form-group">
-            <label for="signalDescription">Décrivez le problème :</label>
-            <textarea id="signalDescription" v-model="signalDescription" rows="4" placeholder="Ex : la bonne réponse semble incorrecte..."></textarea>
-        </div>
-        <div v-if="signalFeedback" class="signal-feedback" :class="signalFeedbackSuccess ? 'signal-success' : 'signal-error'">{{ signalFeedback }}</div>
-        <div class="modal-actions">
-            <button class="btn" @click="closeSignalModal">Annuler</button>
-            <button class="btn btn-warn" :disabled="signalSending" @click="sendSignal">Envoyer</button>
+    <div v-if="modalVisible" id="modalSignalement" class="modal-overlay" @click.self="closeSignalModal">
+        <div class="modal-box">
+            <h3>Signaler un problème</h3>
+            <p class="modal-subtitle">« {{ currentQuestion ? currentQuestion.libelle : '' }} »</p>
+            <div class="form-group">
+                <label for="signalDescription">Décrivez le problème :</label>
+                <textarea id="signalDescription" v-model="signalDescription" rows="4" placeholder="Ex : la bonne réponse semble incorrecte..."></textarea>
+            </div>
+            <div v-if="signalFeedback" class="signal-feedback" :class="signalFeedbackSuccess ? 'signal-success' : 'signal-error'">{{ signalFeedback }}</div>
+            <div class="modal-actions">
+                <button class="btn" @click="closeSignalModal">Annuler</button>
+                <button class="btn btn-warn" :disabled="signalSending" @click="sendSignal">Envoyer</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-document.getElementById('modalSignalement').addEventListener('click', (e) => {
-document.getElementById('btnSignalEnvoyer').addEventListener('click', async () => {
 <script>
 window.__PLAY_PAGE__ = <?= json_encode($playPageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 </script>

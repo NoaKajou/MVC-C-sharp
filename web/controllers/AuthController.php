@@ -1,5 +1,8 @@
 <?php
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+require_once __DIR__ . '/../models/Role.php';
 require_once __DIR__ . '/../models/Utilisateur.php';
 
 class AuthController {
@@ -19,15 +22,20 @@ class AuthController {
             $_SESSION['user_id'] = $utilisateur->id;
             $_SESSION['user_pseudo'] = $utilisateur->pseudo;
             $_SESSION['user_email'] = $utilisateur->email;
+            $_SESSION['user_role_id'] = $utilisateur->idrole;
             return ['success' => true, 'message' => 'Connexion réussie'];
         }
 
         return ['success' => false, 'message' => 'Identifiants incorrects'];
     }
 
-    public static function register($pseudo, $email, $mdp, $confirmMdp) {
-        if (empty($pseudo) || empty($email) || empty($mdp) || empty($confirmMdp)) {
+    public static function register($pseudo, $email, $mdp, $confirmMdp, $idrole) {
+        if (empty($pseudo) || empty($email) || empty($mdp) || empty($confirmMdp) || empty($idrole)) {
             return ['success' => false, 'message' => 'Veuillez remplir tous les champs'];
+        }
+
+        if (!filter_var($idrole, FILTER_VALIDATE_INT) || !Role::exists((int)$idrole)) {
+            return ['success' => false, 'message' => 'Veuillez choisir un rôle valide'];
         }
 
         if ($mdp !== $confirmMdp) {
@@ -50,7 +58,7 @@ class AuthController {
             return ['success' => false, 'message' => 'Ce pseudo est déjà utilisé'];
         }
 
-        if (Utilisateur::create($pseudo, $email, $mdp)) {
+        if (Utilisateur::create($pseudo, $email, $mdp, (int)$idrole)) {
             return ['success' => true, 'message' => 'Inscription réussie ! Vous pouvez maintenant vous connecter'];
         }
 

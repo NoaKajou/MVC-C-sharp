@@ -2,11 +2,21 @@
 require_once __DIR__ . '/../models/Questionnaire.php';
 require_once __DIR__ . '/../models/Question.php';
 require_once __DIR__ . '/../models/Reponse.php';
+require_once __DIR__ . '/../models/Role.php';
 
 class QuestionnaireController {
     
     public static function getAll() {
-        return Questionnaire::getAll();
+        $questionnaires = Questionnaire::getAll();
+        $userLevel = self::getCurrentUserRoleLevel();
+
+        if ($userLevel <= 0) {
+            return [];
+        }
+
+        return array_values(array_filter($questionnaires, static function ($questionnaire) use ($userLevel) {
+            return (int)$questionnaire->niveau >= $userLevel;
+        }));
     }
 
     public static function getMine($utilisateurId) {
@@ -21,7 +31,7 @@ class QuestionnaireController {
         return Questionnaire::getById($id);
     }
 
-    public static function create($nom, $theme, $utilisateurId) {
+    public static function create($nom, $theme, $niveau, $utilisateurId) {
         if (empty($nom)) {
             return ['success' => false, 'message' => 'Le nom est obligatoire'];
         }
@@ -29,14 +39,24 @@ class QuestionnaireController {
             return ['success' => false, 'message' => 'Le thème est obligatoire'];
         }
 
-        $id = Questionnaire::create($nom, $theme, $utilisateurId);
+        $userLevel = self::getCurrentUserRoleLevel();
+        if ($userLevel <= 0) {
+            return ['success' => false, 'message' => 'Rôle utilisateur introuvable'];
+        }
+
+        $niveau = max(1, min(4, (int)$niveau));
+        if ($niveau < $userLevel) {
+            return ['success' => false, 'message' => 'Vous ne pouvez créer qu\'un questionnaire de niveau supérieur ou égal à votre niveau'];
+        }
+
+        $id = Questionnaire::create($nom, $theme, $niveau, $utilisateurId);
         if ($id) {
             return ['success' => true, 'message' => 'Questionnaire créé', 'id' => $id];
         }
         return ['success' => false, 'message' => 'Erreur lors de la création'];
     }
 
-    public static function update($id, $nom, $theme, $utilisateurId) {
+    public static function update($id, $nom, $theme, $niveau, $utilisateurId) {
         $questionnaire = Questionnaire::getById($id);
         if (!$questionnaire || $questionnaire->utilisateurId != $utilisateurId) {
             return ['success' => false, 'message' => 'Questionnaire non trouvé ou non autorisé'];
@@ -46,7 +66,17 @@ class QuestionnaireController {
             return ['success' => false, 'message' => 'Le nom est obligatoire'];
         }
 
-        if (Questionnaire::update($id, $nom, $theme)) {
+        $userLevel = self::getCurrentUserRoleLevel();
+        if ($userLevel <= 0) {
+            return ['success' => false, 'message' => 'Rôle utilisateur introuvable'];
+        }
+
+        $niveau = max(1, min(4, (int)$niveau));
+        if ($niveau < $userLevel) {
+            return ['success' => false, 'message' => 'Vous ne pouvez pas enregistrer un questionnaire de niveau inférieur à votre niveau'];
+        }
+
+        if (Questionnaire::update($id, $nom, $theme, $niveau)) {
             return ['success' => true, 'message' => 'Questionnaire mis à jour'];
         }
         return ['success' => false, 'message' => 'Erreur lors de la mise à jour'];
@@ -179,6 +209,28 @@ class QuestionnaireController {
 
     public static function trackQuestionnaireAccess($utilisateurId, $questionnaireId) {
         return Questionnaire::trackQuestionnaireAccess($utilisateurId, $questionnaireId);
+    }
+
+    public static function canCurrentUserAccess($questionnaire) {
+        if (!$questionnaire->estPublie) {
+            return false;
+        }
+
+        $userLevel = self::getCurrentUserRoleLevel();
+        if ($userLevel <= 0) {
+            return false;
+        }
+
+        return (int)$questionnaire->niveau >= $userLevel;
+    }
+
+    private static function getCurrentUserRoleLevel() {
+        $roleId = $_SESSION['user_role_id'] ?? null;
+        if (!$roleId) {
+            return 0;
+        }
+
+        return Role::getLevelById((int)$roleId);
     }
 
     public static function publish($id, $utilisateurId) {

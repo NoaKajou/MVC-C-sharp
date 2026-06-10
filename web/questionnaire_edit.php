@@ -8,6 +8,8 @@ AuthController::requireLogin();
 $error = null;
 $questionnaire = null;
 $questions = [];
+$currentUserLevel = Role::getLevelById($_SESSION['user_role_id'] ?? 0);
+$availableLevels = $currentUserLevel > 0 ? range($currentUserLevel, 4) : [];
 
 if (isset($_GET['id'])) {
     $questionnaire = QuestionnaireController::getById($_GET['id']);
@@ -20,14 +22,20 @@ if (isset($_GET['id'])) {
     $questions = QuestionnaireController::getQuestions($questionnaire->id);
 }
 
+if ($questionnaire && !in_array((int)$questionnaire->niveau, $availableLevels, true)) {
+    $availableLevels[] = (int)$questionnaire->niveau;
+    sort($availableLevels);
+}
+
 if (isset($_POST['save'])) {
     $nom = $_POST['nom'] ?? '';
     $theme = $_POST['theme'] ?? '';
+    $niveau = $_POST['niveau'] ?? 1;
     
     if ($questionnaire) {
-        $result = QuestionnaireController::update($questionnaire->id, $nom, $theme, $_SESSION['user_id']);
+        $result = QuestionnaireController::update($questionnaire->id, $nom, $theme, $niveau, $_SESSION['user_id']);
     } else {
-        $result = QuestionnaireController::create($nom, $theme, $_SESSION['user_id']);
+        $result = QuestionnaireController::create($nom, $theme, $niveau, $_SESSION['user_id']);
         
         if ($result['success']) {
             header('Location: questionnaire_edit.php?id=' . $result['id']);

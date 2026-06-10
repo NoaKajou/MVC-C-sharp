@@ -39,9 +39,6 @@ CREATE TABLE `Admin` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `Admin`
---
 
 LOCK TABLES `Admin` WRITE;
 /*!40000 ALTER TABLE `Admin` DISABLE KEYS */;
@@ -54,9 +51,6 @@ UNLOCK TABLES;
 -- Table structure for table `LogAdmin`
 --
 
-DROP TABLE IF EXISTS `LogAdmin`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `LogAdmin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `utilisateur_id` int(11) DEFAULT NULL,
@@ -83,9 +77,6 @@ INSERT INTO `LogAdmin` VALUES
 (20,NULL,'CONNEXION_ECHOUEE','Tentative de connexion echouee pour l\'identifiant \'admin\'.','2026-03-27 10:05:23'),
 (21,5,'CONNEXION_REUSSIE','Connexion reussie pour l\'utilisateur \'admin\'.','2026-03-27 10:05:30'),
 (22,5,'CONNEXION_REUSSIE','Connexion reussie pour l\'utilisateur \'admin\'.','2026-04-20 14:19:54'),
-(23,5,'QUESTIONNAIRE_CREE','Le questionnaire \'initiation réseau\' (theme : Réseau) a ete cree par \'admin\'.','2026-04-20 14:20:57'),
-(24,5,'CONNEXION_REUSSIE','Connexion reussie pour l\'utilisateur \'admin\'.','2026-04-20 14:43:31'),
-(25,5,'QUESTIONNAIRE_TERMINE','Le questionnaire \'initiation réseau\' (theme : Réseau) a ete termine par \'admin\' avec un score de 1/1 (100%).','2026-04-20 14:44:05'),
 (26,5,'CONNEXION_REUSSIE','Connexion reussie pour l\'utilisateur \'admin\'.','2026-04-20 15:01:10'),
 (27,5,'CONNEXION_REUSSIE','Connexion reussie pour l\'utilisateur \'admin\'.','2026-04-20 15:14:37'),
 (28,5,'CONNEXION_REUSSIE','Connexion reussie pour l\'utilisateur \'admin\'.','2026-05-26 00:17:54'),
@@ -140,11 +131,13 @@ CREATE TABLE `Questionnaire` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(200) NOT NULL,
   `theme` varchar(100) NOT NULL,
+  `niveau` int(11) NOT NULL DEFAULT 1,
   `utilisateur_id` int(11) NOT NULL,
   `est_publie` tinyint(1) NOT NULL DEFAULT 0,
   `date_publication` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `utilisateur_id` (`utilisateur_id`),
+  KEY `idx_questionnaire_niveau` (`niveau`),
   CONSTRAINT `Questionnaire_ibfk_1` FOREIGN KEY (`utilisateur_id`) REFERENCES `Utilisateur` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -156,9 +149,9 @@ CREATE TABLE `Questionnaire` (
 LOCK TABLES `Questionnaire` WRITE;
 /*!40000 ALTER TABLE `Questionnaire` DISABLE KEYS */;
 INSERT INTO `Questionnaire` VALUES
-(13,'Les choux','Culture générale',5,1,'2026-04-20 14:44:58'),
-(14,'initiation réseau','Réseau',5,1,'2026-04-20 14:45:01'),
-(15,'MEGATRONUS PRIME','Réseau',5,0,NULL);
+(13,'Les choux','Culture générale',1,5,1,'2026-04-20 14:44:58'),
+(14,'initiation réseau','Réseau',2,5,1,'2026-04-20 14:45:01'),
+(15,'MEGATRONUS PRIME','Réseau',3,5,0,NULL);
 /*!40000 ALTER TABLE `Questionnaire` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -331,6 +324,39 @@ LOCK TABLES `Type_question` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `Role`
+--
+
+DROP TABLE IF EXISTS `Role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nom` varchar(100) NOT NULL,
+  `desc` varchar(255) NOT NULL,
+  `niveau` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_role_nom` (`nom`),
+  KEY `idx_role_niveau` (`niveau`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Role`
+--
+
+LOCK TABLES `Role` WRITE;
+/*!40000 ALTER TABLE `Role` DISABLE KEYS */;
+INSERT INTO `Role` VALUES
+(1,'Administratif','Personnel des services administratifs',1),
+(2,'Technicien','Personnel technique',2),
+(3,'Support','Personnel des services support ICT',3),
+(4,'Gestion','Personnel comptable et financier, management',3),
+(5,'Direction','Directeur de departements',4);
+/*!40000 ALTER TABLE `Role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `Utilisateur`
 --
 
@@ -342,9 +368,12 @@ CREATE TABLE `Utilisateur` (
   `pseudo` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
   `mdp` varchar(255) NOT NULL,
+  `idrole` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pseudo` (`pseudo`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  KEY `idx_utilisateur_role` (`idrole`),
+  CONSTRAINT `fk_utilisateur_role` FOREIGN KEY (`idrole`) REFERENCES `Role` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -355,8 +384,8 @@ CREATE TABLE `Utilisateur` (
 LOCK TABLES `Utilisateur` WRITE;
 /*!40000 ALTER TABLE `Utilisateur` DISABLE KEYS */;
 INSERT INTO `Utilisateur` VALUES
-(5,'admin','admin@stadium.local','$2y$10$eFRJyJs/99bC1sN9bKcRw.qxbwCAnfsnkm.aOiJxDjnTgVeTofr.G'),
-(6,'joueur','joueur@stadium.local','$2y$10$ByTxUTzPte96GBXb8KP8COkSh6//z.S5qrupmrWIdupcfeJ97.hxm');
+(5,'admin','admin@stadium.local','$2y$10$eFRJyJs/99bC1sN9bKcRw.qxbwCAnfsnkm.aOiJxDjnTgVeTofr.G',5),
+(6,'joueur','joueur@stadium.local','$2y$10$ByTxUTzPte96GBXb8KP8COkSh6//z.S5qrupmrWIdupcfeJ97.hxm',1);
 /*!40000 ALTER TABLE `Utilisateur` ENABLE KEYS */;
 UNLOCK TABLES;
 

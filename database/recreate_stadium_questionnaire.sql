@@ -8,21 +8,43 @@ CREATE TABLE Utilisateur (
     email VARCHAR(255) NOT NULL,
     pseudo VARCHAR(100) NOT NULL,
     mdp VARCHAR(255) NOT NULL,
+    idrole INT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uq_utilisateur_email (email),
-    UNIQUE KEY uq_utilisateur_pseudo (pseudo)
+    UNIQUE KEY uq_utilisateur_pseudo (pseudo),
+    INDEX idx_utilisateur_role (idrole)
 ) ENGINE=InnoDB;
+
+-- User roles
+CREATE TABLE Role (
+    id INT NOT NULL AUTO_INCREMENT,
+    nom VARCHAR(100) NOT NULL,
+    `desc` VARCHAR(255) NOT NULL,
+    niveau INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_role_nom (nom),
+    INDEX idx_role_niveau (niveau)
+) ENGINE=InnoDB;
+
+ALTER TABLE Utilisateur
+    ADD CONSTRAINT fk_utilisateur_role
+    FOREIGN KEY (idrole)
+    REFERENCES Role(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
 
 -- Quiz containers
 CREATE TABLE Questionnaire (
     id INT NOT NULL AUTO_INCREMENT,
     nom VARCHAR(255) NOT NULL,
     theme VARCHAR(100) NOT NULL,
+    niveau INT NOT NULL DEFAULT 1,
     utilisateur_id INT NOT NULL,
     est_publie TINYINT(1) NOT NULL DEFAULT 0,
     date_publication DATETIME NULL DEFAULT NULL,
     PRIMARY KEY (id),
     INDEX idx_questionnaire_user (utilisateur_id),
+    INDEX idx_questionnaire_niveau (niveau),
     CONSTRAINT fk_questionnaire_utilisateur
         FOREIGN KEY (utilisateur_id)
         REFERENCES Utilisateur(id)
@@ -171,13 +193,20 @@ CREATE TABLE Signalement (
 ) ENGINE=InnoDB;
 
 -- Seed data (replace hashes with real bcrypt values if needed)
-INSERT INTO Utilisateur (id, pseudo, email, mdp) VALUES
-    (1, 'admin', 'admin@example.com', '$2y$10$exampleexampleexampleexampleexampleexampleexampleexampleexample');
+INSERT INTO Utilisateur (id, pseudo, email, mdp, idrole) VALUES
+    (1, 'admin', 'admin@example.com', '$2y$10$exampleexampleexampleexampleexampleexampleexampleexampleexample', 5);
+
+INSERT INTO Role (id, nom, `desc`, niveau) VALUES
+    (1, 'Administratif', 'Personnel des services administratifs', 1),
+    (2, 'Technicien', 'Personnel technique', 2),
+    (3, 'Support', 'Personnel des services support ICT', 3),
+    (4, 'Gestion', 'Personnel comptable et financier, management', 3),
+    (5, 'Direction', 'Directeur de departements', 4);
 
 INSERT INTO Admin (utilisateur_id) VALUES (1);
 
-INSERT INTO Questionnaire (id, nom, theme, utilisateur_id, est_publie, date_publication) VALUES
-    (1, 'Quiz Reseau', 'Réseau', 1, 1, NOW());
+INSERT INTO Questionnaire (id, nom, theme, niveau, utilisateur_id, est_publie, date_publication) VALUES
+    (1, 'Quiz Reseau', 'Réseau', 4, 1, 1, NOW());
 
 INSERT INTO Question (id, questionnaire_id, numero, libelle, type_reponse, reponse_vrai_faux) VALUES
     (1, 1, 1, '192.168.1.1 est-elle une adresse IP privee ?', 'VraiFaux', 1),

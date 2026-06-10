@@ -18,6 +18,11 @@ if (!$questionnaire) {
     exit;
 }
 
+if (!QuestionnaireController::canCurrentUserAccess($questionnaire)) {
+    header('Location: questionnaires.php?error=Vous+ne+pouvez+pas+acceder+a+ce+questionnaire');
+    exit;
+}
+
 QuestionnaireController::trackQuestionnaireAccess($_SESSION['user_id'], $questionnaireId);
 
 $questions = QuestionnaireController::getQuestions($questionnaireId);

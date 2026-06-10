@@ -2,14 +2,6 @@
 class Database {
     private static $connections = [
         [
-            'label' => 'distante',
-            'host' => '104.40.137.99',
-            'port' => '22260',
-            'dbname' => 'stadium_questionnaire',
-            'username' => 'developer',
-            'password' => 'cerfal1313',
-        ],
-        [
             'label' => 'locale',
             'host' => 'localhost',
             'port' => '3306',

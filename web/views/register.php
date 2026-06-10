@@ -3,6 +3,7 @@ $title = 'Inscription';
 $registerPageData = [
     'error' => $error ?? null,
     'success' => $success ?? null,
+    'roles' => $roles ?? [],
 ];
 include 'header.php';
 ?>
@@ -23,6 +24,18 @@ include 'header.php';
         <div class="form-group">
             <label>Email</label>
             <input type="email" name="email" v-model="email" placeholder="Entrez votre email" required>
+        </div>
+
+        <div class="form-group">
+            <label>Rôle</label>
+            <select name="idrole" v-model="roleId" required>
+                <option value="" disabled>Sélectionnez votre rôle</option>
+                <?php foreach (($registerPageData['roles'] ?? []) as $role): ?>
+                    <option value="<?= htmlspecialchars($role['id']) ?>">
+                        <?= htmlspecialchars($role['nom']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
         </div>
         
         <div class="form-group">

@@ -197,6 +197,7 @@ function initRegisterVue() {
             return {
                 pseudo: '',
                 email: '',
+                roleId: '',
                 mdp: '',
                 confirmMdp: '',
                 error: pageData.error || '',
@@ -208,7 +209,7 @@ function initRegisterVue() {
                 return !this.mdp || !this.confirmMdp || this.mdp === this.confirmMdp;
             },
             canSubmit() {
-                return this.pseudo.trim() && this.email.trim() && this.mdp.trim() && this.confirmMdp.trim() && this.passwordsMatch;
+                return this.pseudo.trim() && this.email.trim() && this.roleId && this.mdp.trim() && this.confirmMdp.trim() && this.passwordsMatch;
             }
         }
     }).mount('#registerApp');
@@ -287,7 +288,7 @@ function initQuestionnaireEditVue() {
     window.Vue.createApp({
         data() {
             return {
-                questionnaire: pageData.questionnaire || { id: null, nom: '', theme: '', estPublie: false },
+                questionnaire: pageData.questionnaire || { id: null, nom: '', theme: '', niveau: 1, estPublie: false },
                 questions: pageData.questions || [],
                 error: pageData.error || ''
             };

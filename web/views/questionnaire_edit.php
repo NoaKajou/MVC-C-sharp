@@ -5,6 +5,7 @@ $questionnaireEditPageData = [
         'id' => $questionnaire->id,
         'nom' => $questionnaire->nom,
         'theme' => $questionnaire->theme,
+        'niveau' => $questionnaire->niveau ?? 1,
         'estPublie' => $questionnaire->estPublie,
     ] : null,
     'questions' => array_map(static function ($question) {
@@ -44,6 +45,24 @@ include 'header.php';
                     <option value="Développement">Développement</option>
                     <option value="Réseau">Réseau</option>
                     <option value="Culture générale">Culture générale</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Niveau du questionnaire</label>
+                <select name="niveau" v-model="questionnaire.niveau" required>
+                    <?php foreach (($availableLevels ?? []) as $level): ?>
+                        <?php
+                            $label = match ($level) {
+                                1 => '1 - Administratif',
+                                2 => '2 - Technicien',
+                                3 => '3 - Support / Gestion',
+                                4 => '4 - Direction',
+                                default => (string)$level,
+                            };
+                        ?>
+                        <option :value="<?= (int)$level ?>"><?= htmlspecialchars($label) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             

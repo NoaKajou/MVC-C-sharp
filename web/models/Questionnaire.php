@@ -5,15 +5,17 @@ class Questionnaire {
     public $id;
     public $nom;
     public $theme;
+    public $niveau;
     public $utilisateurId;
     public $nombreQuestions;
     public $estPublie;
     public $datePublication;
 
-    public function __construct($id = null, $nom = '', $theme = '', $utilisateurId = null, $nombreQuestions = 0, $estPublie = false, $datePublication = null) {
+    public function __construct($id = null, $nom = '', $theme = '', $niveau = 1, $utilisateurId = null, $nombreQuestions = 0, $estPublie = false, $datePublication = null) {
         $this->id = $id;
         $this->nom = $nom;
         $this->theme = $theme;
+        $this->niveau = (int)$niveau;
         $this->utilisateurId = $utilisateurId;
         $this->nombreQuestions = $nombreQuestions;
         $this->estPublie = (bool)$estPublie;
@@ -22,9 +24,9 @@ class Questionnaire {
 
     public static function getAll() {
         $pdo = Database::getConnection();
-        self::ensurePublicationColumns();
+        self::ensureVisibilityColumns();
 
-        $stmt = $pdo->query("SELECT q.id, q.nom, q.theme, q.utilisateur_id,
+        $stmt = $pdo->query("SELECT q.id, q.nom, q.theme, q.niveau, q.utilisateur_id,
                             q.est_publie, q.date_publication,
                             (SELECT COUNT(*) FROM Question WHERE questionnaire_id = q.id) as nb_questions
                             FROM Questionnaire q
@@ -36,6 +38,7 @@ class Questionnaire {
                 $row['id'],
                 $row['nom'],
                 $row['theme'],
+                $row['niveau'] ?? 1,
                 $row['utilisateur_id'],
                 $row['nb_questions'],
                 $row['est_publie'],
@@ -47,9 +50,9 @@ class Questionnaire {
 
     public static function getAllByUtilisateur($utilisateurId) {
         $pdo = Database::getConnection();
-        self::ensurePublicationColumns();
+        self::ensureVisibilityColumns();
 
-        $stmt = $pdo->prepare("SELECT q.id, q.nom, q.theme, q.utilisateur_id,
+        $stmt = $pdo->prepare("SELECT q.id, q.nom, q.theme, q.niveau, q.utilisateur_id,
                               q.est_publie, q.date_publication,
                               (SELECT COUNT(*) FROM Question WHERE questionnaire_id = q.id) as nb_questions
                               FROM Questionnaire q
@@ -63,6 +66,7 @@ class Questionnaire {
                 $row['id'],
                 $row['nom'],
                 $row['theme'],
+                $row['niveau'] ?? 1,
                 $row['utilisateur_id'],
                 $row['nb_questions'],
                 $row['est_publie'],
@@ -74,9 +78,9 @@ class Questionnaire {
 
     public static function getById($id) {
         $pdo = Database::getConnection();
-        self::ensurePublicationColumns();
+        self::ensureVisibilityColumns();
 
-        $stmt = $pdo->prepare("SELECT q.id, q.nom, q.theme, q.utilisateur_id,
+        $stmt = $pdo->prepare("SELECT q.id, q.nom, q.theme, q.niveau, q.utilisateur_id,
                               q.est_publie, q.date_publication,
                               (SELECT COUNT(*) FROM Question WHERE questionnaire_id = q.id) as nb_questions
                               FROM Questionnaire q WHERE q.id = ?");
@@ -88,6 +92,7 @@ class Questionnaire {
                 $row['id'],
                 $row['nom'],
                 $row['theme'],
+                $row['niveau'] ?? 1,
                 $row['utilisateur_id'],
                 $row['nb_questions'],
                 $row['est_publie'],
@@ -97,19 +102,19 @@ class Questionnaire {
         return null;
     }
 
-    public static function create($nom, $theme, $utilisateurId) {
+    public static function create($nom, $theme, $niveau, $utilisateurId) {
         $pdo = Database::getConnection();
-        self::ensurePublicationColumns();
+        self::ensureVisibilityColumns();
 
-        $stmt = $pdo->prepare("INSERT INTO Questionnaire (nom, theme, utilisateur_id, est_publie, date_publication) VALUES (?, ?, ?, 0, NULL)");
-        $stmt->execute([$nom, $theme, $utilisateurId]);
+        $stmt = $pdo->prepare("INSERT INTO Questionnaire (nom, theme, niveau, utilisateur_id, est_publie, date_publication) VALUES (?, ?, ?, ?, 0, NULL)");
+        $stmt->execute([$nom, $theme, $niveau, $utilisateurId]);
         return $pdo->lastInsertId();
     }
 
-    public static function update($id, $nom, $theme) {
+    public static function update($id, $nom, $theme, $niveau) {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("UPDATE Questionnaire SET nom = ?, theme = ? WHERE id = ?");
-        return $stmt->execute([$nom, $theme, $id]);
+        $stmt = $pdo->prepare("UPDATE Questionnaire SET nom = ?, theme = ?, niveau = ? WHERE id = ?");
+        return $stmt->execute([$nom, $theme, $niveau, $id]);
     }
 
     public static function delete($id) {
@@ -212,8 +217,8 @@ class Questionnaire {
         }
 
         $insertStmt = $pdo->prepare("INSERT INTO ReponseUtilisateur
-                                    (utilisateur_id, question_id, questionnaire_id, reponse_texte, reponse_bool, est_correcte)
-                                    VALUES (?, ?, ?, ?, ?, ?)");
+                                    (utilisateur_id, question_id, questionnaire_id, reponse_texte, reponse_bool, est_correcte, date_reponse)
+                                    VALUES (?, ?, ?, ?, ?, ?, NOW())");
         return $insertStmt->execute([
             $utilisateurId,
             $questionId,
@@ -290,6 +295,15 @@ class Questionnaire {
 
         if (!self::hasColumn($pdo, 'Questionnaire', 'date_publication')) {
             $pdo->exec("ALTER TABLE Questionnaire ADD COLUMN date_publication DATETIME NULL DEFAULT NULL");
+        }
+    }
+
+    private static function ensureVisibilityColumns() {
+        self::ensurePublicationColumns();
+        $pdo = Database::getConnection();
+
+        if (!self::hasColumn($pdo, 'Questionnaire', 'niveau')) {
+            $pdo->exec("ALTER TABLE Questionnaire ADD COLUMN niveau INT NOT NULL DEFAULT 1 AFTER theme");
         }
     }
 
